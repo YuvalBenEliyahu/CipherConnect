@@ -3,12 +3,13 @@ class Clients:
         self.db_manager = db_manager
         self.clients = {}  # In-memory cache for clients
 
-    def add_client(self, name, last_name, phone_number, password):
-        if self.db_manager.add_user(name, last_name, phone_number, password):
+    def add_client(self, name, last_name, phone_number, password, public_key):
+        if self.db_manager.add_user(name, last_name, phone_number, password, public_key):
             self.clients[phone_number] = {
                 "name": name,
                 "last_name": last_name,
-                "phone_number": phone_number
+                "phone_number": phone_number,
+                "public_key": public_key
             }
             return True
         return False

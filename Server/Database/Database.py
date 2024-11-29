@@ -23,8 +23,13 @@ class DatabaseManager:
     def __del__(self):
         self.conn.close()
 
-    # Add a new user with an optional publicKey
     def add_user(self, name, last_name, phone_number, password, public_key=None):
+        # Check if the phone number already exists
+        if self.get_user_by_phone_number(phone_number):
+            error_message = "Error: Phone number already exists."
+            print(error_message)
+            return error_message
+
         created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         try:
@@ -33,11 +38,13 @@ class DatabaseManager:
                 VALUES (?, ?, ?, ?, ?, ?)
             ''', (phone_number, name, last_name, password, public_key, created_at))
             self.conn.commit()
-            print(f"User {name} {last_name} added successfully.")
-            return True
-        except sqlite3.IntegrityError:
-            print("Error: Phone number already exists.")
-            return False
+            success_message = f"User {name} {last_name} added successfully."
+            print(success_message)
+            return success_message
+        except sqlite3.IntegrityError as e:
+            error_message = f"Error: {str(e)}"
+            print(error_message)
+            return error_message
 
     # Retrieve user details by phone number, including publicKey
     def get_user_by_phone_number(self, phone_number):
