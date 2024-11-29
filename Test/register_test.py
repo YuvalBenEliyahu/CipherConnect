@@ -28,7 +28,7 @@ class TestRegistration(unittest.TestCase):
                 "first_name": "foo",
                 "last_name": "bar",
                 "phone_number": "054567891",
-                "password": "123456",
+                "password": "Password1$",
                 "public_key": public_key_pem.decode('utf-8')
             }
             data = json.dumps(registration_data)

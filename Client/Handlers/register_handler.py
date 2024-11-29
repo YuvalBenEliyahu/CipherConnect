@@ -30,11 +30,14 @@ def register(client_socket):
         print("Password cannot be empty. Please try again.")
 
     data = json.dumps({
-        "first_name": first_name,
-        "last_name": last_name,
-        "phone_number": phone_number,
-        "password": password,
-        "public_key": public_key_pem.decode('utf-8')
+        "command": "REGISTER",
+        "payload": {
+            "first_name": first_name,
+            "last_name": last_name,
+            "phone_number": phone_number,
+            "password": password,
+            "public_key": public_key_pem.decode('utf-8')
+        }
     })
     client_socket.sendall(data.encode(ENCODE))
     response = client_socket.recv(BUFFER_SIZE).decode(ENCODE)

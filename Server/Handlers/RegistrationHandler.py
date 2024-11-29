@@ -1,17 +1,26 @@
 import re
 from Server.utils import password_check, validate_public_key
+import json
 
 class RegistrationHandler:
     def __init__(self, db_manager):
         self.db_manager = db_manager
 
-    def handle_registration(self, payload):
-        # Parse registration data
-        parts = payload.split(",")
-        if len(parts) != 5:
-            return "ERROR: Invalid registration data format."
 
-        name, last_name, phone_number, password, public_key = parts
+    def handle_registration(self, payload):
+        try:
+            data = json.loads(payload)
+        except json.JSONDecodeError:
+            return "ERROR: Invalid JSON format."
+
+        name = data.get("first_name")
+        last_name = data.get("last_name")
+        phone_number = data.get("phone_number")
+        password = data.get("password")
+        public_key = data.get("public_key")
+
+        if not name or not last_name or not phone_number or not password or not public_key:
+            return "ERROR: Missing registration data."
 
         # Validate name (only letters and spaces)
         if not re.match(r'^[A-Za-z\s]+$', name):

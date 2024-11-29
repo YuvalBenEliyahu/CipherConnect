@@ -3,7 +3,9 @@ import threading
 import logging
 from Server.Database.Database import DatabaseManager
 from Server.Handlers.RegistrationHandler import RegistrationHandler
+
 from Server.config import HOST, PORT, BUFFER_SIZE
+import json
 
 # Initialize the database and handlers
 db_manager = DatabaseManager()
@@ -12,20 +14,27 @@ registration_handler = RegistrationHandler(db_manager)
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
+
+
 def handle_client(client_socket):
     try:
-        # Receive data from the client
         data = client_socket.recv(BUFFER_SIZE).decode()
         if not data:
             return
 
-        # Split the data into command and payload
-        parts = data.split("|", 1)
-        if len(parts) != 2:
-            client_socket.send("ERROR: Invalid data format.".encode())
+        # Parse JSON data
+        try:
+            request = json.loads(data)
+        except json.JSONDecodeError:
+            client_socket.send("ERROR: Invalid JSON format.".encode())
             return
 
-        command, payload = parts[0], parts[1]
+        command = request.get("command")
+        payload = request.get("payload")
+
+        if not command or not payload:
+            client_socket.send("ERROR: Missing command or payload.".encode())
+            return
 
         # Handle the command
         if command == "REGISTER":
@@ -53,3 +62,4 @@ def start_server():
         logging.info(f"New connection from {client_address}")
         thread = threading.Thread(target=handle_client, args=(client_socket,))
         thread.start()
+

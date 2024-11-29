@@ -8,4 +8,4 @@ if __name__ == "__main__":
     parser.add_argument('--port', type=int, default=PORT, help="Server port to connect to. Default is 8080.")
     args = parser.parse_args()
 
-    start_client(host=args.host, port=args.port)
+    start_client(host=args.host1, port=args.port)
