@@ -1,6 +1,5 @@
 import socket
 import sys
-import json
 
 
 def register(client_socket):
@@ -29,13 +28,14 @@ def register(client_socket):
             break
         print("Password cannot be empty. Please try again.")
 
-    data = json.dumps({
-        "first_name": first_name,
-        "last_name": last_name,
-        "phone_number": phone_number,
-        "password": password
-    })
-    client_socket.sendall(data.encode('utf-8'))
+    public_key = input("Enter your public key (optional): ").strip()
+
+    # Format the registration data
+    registration_data = f"REGISTER|{first_name},{last_name},{phone_number},{password}"
+    if public_key:
+        registration_data += f",{public_key}"
+
+    client_socket.sendall(registration_data.encode('utf-8'))
     response = client_socket.recv(1024).decode('utf-8')
     print(f"Server response: {response}")
 
