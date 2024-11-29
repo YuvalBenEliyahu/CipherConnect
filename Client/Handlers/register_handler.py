@@ -1,5 +1,6 @@
 import json
 from Client.config import BUFFER_SIZE, ENCODE
+from Client.encryption import public_key_pem
 
 
 def register(client_socket):
@@ -32,7 +33,8 @@ def register(client_socket):
         "first_name": first_name,
         "last_name": last_name,
         "phone_number": phone_number,
-        "password": password
+        "password": password,
+        "public_key": public_key_pem.decode('utf-8')
     })
     client_socket.sendall(data.encode(ENCODE))
     response = client_socket.recv(BUFFER_SIZE).decode(ENCODE)

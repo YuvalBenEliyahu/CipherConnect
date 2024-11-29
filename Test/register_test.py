@@ -4,6 +4,7 @@ import json
 import time
 import unittest
 
+from Client.encryption import public_key_pem
 from Server.server import start_server
 from Client.config import HOST, PORT, BUFFER_SIZE
 
@@ -27,7 +28,8 @@ class TestRegistration(unittest.TestCase):
                 "first_name": "foo",
                 "last_name": "bar",
                 "phone_number": "054567891",
-                "password": "123456"
+                "password": "123456",
+                "public_key": public_key_pem.decode('utf-8')
             }
             data = json.dumps(registration_data)
 
