@@ -1,6 +1,5 @@
 import json
-
-from Client.config import BUFFER_SIZE
+from Client.config import BUFFER_SIZE, ENCODE
 
 
 def register(client_socket):
@@ -35,6 +34,6 @@ def register(client_socket):
         "phone_number": phone_number,
         "password": password
     })
-    client_socket.sendall(data.encode('utf-8'))
-    response = client_socket.recv(BUFFER_SIZE).decode('utf-8')
+    client_socket.sendall(data.encode(ENCODE))
+    response = client_socket.recv(BUFFER_SIZE).decode(ENCODE)
     print(f"Server response: {response}")
