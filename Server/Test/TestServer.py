@@ -1,12 +1,19 @@
 import unittest
 import socket
 import threading
+import os
 from Server.server import start_server
 from Server.config import HOST, PORT, BUFFER_SIZE
+
 
 class TestServer(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        # Delete the users.db file if it exists
+        db_path = 'Server/Test/users.db'
+        if os.path.exists(db_path):
+            os.remove(db_path)
+
         cls.server_thread = threading.Thread(target=start_server)
         cls.server_thread.daemon = True
         cls.server_thread.start()
@@ -32,6 +39,7 @@ class TestServer(unittest.TestCase):
             self.assertEqual(response, "ERROR: Unknown command 'INVALID'.")
         finally:
             client_socket.close()
+
 
 if __name__ == '__main__':
     unittest.main()

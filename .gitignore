@@ -12,3 +12,6 @@
 !/idea/inspectionProfiles
 !/idea/runConfigurations
 
+Server/users.db
+Server/Test/users.db
+
