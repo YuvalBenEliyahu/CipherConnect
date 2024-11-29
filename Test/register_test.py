@@ -24,9 +24,9 @@ class TestRegistration(unittest.TestCase):
 
             # Prepare registration data
             registration_data = {
-                "first_name": "TAL",
-                "last_name": "TR",
-                "phone_number": "054",
+                "first_name": "foo",
+                "last_name": "bar",
+                "phone_number": "054567891",
                 "password": "123456"
             }
             data = json.dumps(registration_data)
@@ -37,6 +37,7 @@ class TestRegistration(unittest.TestCase):
             # Receive and verify the server's response
             response = client_socket.recv(BUFFER_SIZE).decode('utf-8')
             self.assertEqual(response, "Registration successful")
+
 
 if __name__ == "__main__":
     unittest.main()
