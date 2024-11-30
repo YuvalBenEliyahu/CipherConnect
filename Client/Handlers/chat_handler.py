@@ -1,17 +1,26 @@
-from Client.config import BUFFER_SIZE
+import json
+
+from Client.config import BUFFER_SIZE, ENCODE
 from Client.Database.Database import ClientDatabaseManager
 
 db_manager = ClientDatabaseManager()
 
 
-def send_message(client_socket, phone_number):
+def send_message(client_socket, to_phone_number):
     """Send a message to a specific user."""
     message = input("Enter your message: ")
-    client_socket.sendall(f"MESSAGE {phone_number} {message}".encode('utf-8'))
-    response = client_socket.recv(BUFFER_SIZE).decode('utf-8')
+    data = json.dumps({
+        "command": "MESSAGE",
+        "data": {
+            "receiver_phone_number": to_phone_number,
+            "message": message
+        }
+    })
+    client_socket.sendall(data.encode(ENCODE))
+    response = client_socket.recv(BUFFER_SIZE).decode(ENCODE)
     print(f"Server response: {response}")
-    db_manager.add_chat_message(phone_number, f"You: {message}")
-    print_chat(phone_number)
+    db_manager.add_chat_message(to_phone_number, f"You: {message}")
+    print_chat(to_phone_number)
 
 
 def view_chats():
