@@ -1,6 +1,7 @@
 import sqlite3
 from datetime import datetime
 
+
 class ClientDatabaseManager:
     def __init__(self, db_filename="client_chats.db"):
         self.db_filename = db_filename
@@ -19,9 +20,8 @@ class ClientDatabaseManager:
         ''')
         self.conn.commit()
 
-    def add_chat_message(self, phone_number, message):
+    def add_chat_message(self, phone_number, message, timestamp):
         """Add a chat message to the database."""
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         self.cursor.execute('''
             INSERT INTO chats (phone_number, message, timestamp)
             VALUES (?, ?, ?)
