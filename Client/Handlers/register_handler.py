@@ -2,7 +2,6 @@ import json
 from Client.config import BUFFER_SIZE, ENCODE
 from Client.encryption import public_key_pem
 
-
 def register(client_socket):
     """Register the client with the server."""
     while True:
@@ -31,7 +30,7 @@ def register(client_socket):
 
     data = json.dumps({
         "command": "REGISTER",
-        "payload": {
+        "data": {
             "first_name": first_name,
             "last_name": last_name,
             "phone_number": phone_number,
@@ -39,6 +38,12 @@ def register(client_socket):
             "public_key": public_key_pem.decode('utf-8')
         }
     })
-    client_socket.sendall(data.encode(ENCODE))
-    response = client_socket.recv(BUFFER_SIZE).decode(ENCODE)
-    print(f"Server response: {response}")
+
+    try:
+        client_socket.sendall(data.encode(ENCODE))
+        response = client_socket.recv(BUFFER_SIZE).decode(ENCODE)
+        print(f"Server response: {response}")
+    except ConnectionAbortedError as e:
+        print(f"Connection was aborted: {e}")
+    except Exception as e:
+        print(f"An error occurred: {e}")

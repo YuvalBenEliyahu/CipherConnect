@@ -15,7 +15,6 @@ registration_handler = RegistrationHandler(db_manager)
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-
 def handle_client(client_socket):
     try:
         data = client_socket.recv(BUFFER_SIZE).decode()
@@ -30,7 +29,7 @@ def handle_client(client_socket):
             return
 
         command = request.get("command")
-        payload = request.get("payload")
+        payload = request.get("data")
 
         if not command or not payload:
             client_socket.send("ERROR: Missing command or payload.".encode())
@@ -38,7 +37,9 @@ def handle_client(client_socket):
 
         # Handle the command
         if command == "REGISTER":
-            response = registration_handler.handle_registration(payload)
+            # Convert payload to JSON string
+            payload_json = json.dumps(payload)
+            response = registration_handler.handle_registration(payload_json)
             client_socket.send(response.encode())
         else:
             client_socket.send(f"ERROR: Unknown command '{command}'.".encode())

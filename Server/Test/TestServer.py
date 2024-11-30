@@ -1,13 +1,12 @@
-# Python
-import unittest
+import os
 import socket
 import threading
-import os
-import time
+import unittest
+import json
 
 from Server.Test.TestUtils import generate_public_key
-from Server.server import start_server
 from Server.config import HOST, PORT, BUFFER_SIZE
+from Server.server import start_server
 
 
 class TestServer(unittest.TestCase):
@@ -27,8 +26,16 @@ class TestServer(unittest.TestCase):
         try:
             client_socket.connect((HOST, PORT))
             public_key_pem = generate_public_key()
-            # Use a valid password format
-            registration_data = f"REGISTER|John,Doe,1234567890,Password1$,{public_key_pem}"
+            registration_data = json.dumps({
+                "command": "REGISTER",
+                "data": {
+                    "first_name": "John",
+                    "last_name": "Doe",
+                    "phone_number": "1234567890",
+                    "password": "Password1$",
+                    "public_key": public_key_pem
+                }
+            })
             client_socket.sendall(registration_data.encode('utf-8'))
             response = client_socket.recv(BUFFER_SIZE).decode('utf-8')
             self.assertEqual(response, "SUCCESS: User John Doe registered.")
@@ -39,7 +46,10 @@ class TestServer(unittest.TestCase):
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             client_socket.connect((HOST, PORT))
-            invalid_data = "INVALID|Some data"
+            invalid_data = json.dumps({
+                "command": "INVALID",
+                "data": {}
+            })
             client_socket.sendall(invalid_data.encode('utf-8'))
             response = client_socket.recv(BUFFER_SIZE).decode('utf-8')
             self.assertEqual(response, "ERROR: Unknown command 'INVALID'.")
