@@ -17,7 +17,7 @@ def login(client_socket):
         print("Password cannot be empty. Please try again.")
 
     data = json.dumps({
-        "command": "LOGIN",
+        "type": "LOGIN",
         "data": {
             "phone_number": phone_number,
             "password": password

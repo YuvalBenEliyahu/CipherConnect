@@ -30,7 +30,7 @@ def register(client_socket):
         print("Password cannot be empty. Please try again.")
 
     data = json.dumps({
-        "command": "REGISTER",
+        "type": "REGISTER",
         "data": {
             "first_name": first_name,
             "last_name": last_name,
