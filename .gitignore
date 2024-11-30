@@ -14,8 +14,6 @@
 
 Server/users.db
 Server/Test/users.db
-Test/users.db
-
 
 /Client/private_key.pem
 /Client/public_key.pem
