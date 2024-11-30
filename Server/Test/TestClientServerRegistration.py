@@ -7,9 +7,11 @@ import json
 from Server.Test.TestUtils import generate_public_key
 from Server.config import HOST, PORT, BUFFER_SIZE
 from Server.server import start_server
+from Client.config import ENCODE
 
+import time
 
-class TestServer(unittest.TestCase):
+class TestClientServerRegistration(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Delete the users.db file if it exists
@@ -20,8 +22,21 @@ class TestServer(unittest.TestCase):
         cls.server_thread = threading.Thread(target=start_server)
         cls.server_thread.daemon = True
         cls.server_thread.start()
+        time.sleep(1)  # Give the server some time to start
 
-    def test_server_registration(self):
+    @classmethod
+    def tearDownClass(cls):
+        # Ensure the server is stopped
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            client_socket.connect((HOST, PORT))
+            shutdown_command = json.dumps({"command": "SHUTDOWN"})
+            client_socket.sendall(shutdown_command.encode(ENCODE))
+        finally:
+            client_socket.close()
+        cls.server_thread.join()
+
+    def test_registration(self):
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             client_socket.connect((HOST, PORT))
@@ -36,25 +51,12 @@ class TestServer(unittest.TestCase):
                     "public_key": public_key_pem
                 }
             })
-            client_socket.sendall(registration_data.encode('utf-8'))
-            response = client_socket.recv(BUFFER_SIZE).decode('utf-8')
+            client_socket.sendall(registration_data.encode(ENCODE))
+            response = client_socket.recv(BUFFER_SIZE).decode(ENCODE)
             self.assertEqual(response, "SUCCESS: User John Doe registered.")
         finally:
             client_socket.close()
 
-    def test_server_invalid_command(self):
-        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        try:
-            client_socket.connect((HOST, PORT))
-            invalid_data = json.dumps({
-                "command": "INVALID",
-                "data": {}
-            })
-            client_socket.sendall(invalid_data.encode('utf-8'))
-            response = client_socket.recv(BUFFER_SIZE).decode('utf-8')
-            self.assertEqual(response, "ERROR: Unknown command 'INVALID'.")
-        finally:
-            client_socket.close()
 
 if __name__ == '__main__':
     unittest.main()

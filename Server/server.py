@@ -7,15 +7,18 @@ from Server.Handlers.RegistrationHandler import RegistrationHandler
 from Server.config import HOST, PORT, BUFFER_SIZE
 import json
 
-# Initialize the database and handlers
-db_manager = DatabaseManager()
-registration_handler = RegistrationHandler(db_manager)
-
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-def handle_client(client_socket):
+from Server.Handlers.login_handler import LoginHandler
+
+# Initialize the database and handlers
+db_manager = DatabaseManager()
+registration_handler = RegistrationHandler(db_manager)
+login_handler = LoginHandler(db_manager)
+
+def handle_client(client_socket, client_address):
     try:
         data = client_socket.recv(BUFFER_SIZE).decode()
         if not data:
@@ -37,9 +40,12 @@ def handle_client(client_socket):
 
         # Handle the command
         if command == "REGISTER":
-            # Convert payload to JSON string
             payload_json = json.dumps(payload)
-            response = registration_handler.handle_registration(payload_json)
+            response = registration_handler.handle_registration(payload_json, client_address)
+            client_socket.send(response.encode())
+        elif command == "LOGIN":
+            payload_json = json.dumps(payload)
+            response = login_handler.handle_login(payload_json, client_address)
             client_socket.send(response.encode())
         else:
             client_socket.send(f"ERROR: Unknown command '{command}'.".encode())
@@ -58,9 +64,14 @@ def start_server():
     server_socket.listen(5)
     logging.info(f"Server is listening on {HOST}:{PORT}")
 
-    while True:
-        client_socket, client_address = server_socket.accept()
-        logging.info(f"New connection from {client_address}")
-        thread = threading.Thread(target=handle_client, args=(client_socket,))
-        thread.start()
-
+    try:
+        while True:
+            client_socket, client_address = server_socket.accept()
+            logging.info(f"New connection from {client_address}")
+            thread = threading.Thread(target=handle_client, args=(client_socket, client_address, server_socket))
+            thread.start()
+    except Exception as e:
+        logging.error(f"Server encountered an error: {e}")
+    finally:
+        server_socket.close()
+        logging.info("Server has been shut down.")

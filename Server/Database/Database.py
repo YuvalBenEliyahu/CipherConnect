@@ -4,7 +4,8 @@ from datetime import datetime
 
 class DatabaseManager:
     def __init__(self, db_filename="users.db"):
-        self.conn = sqlite3.connect(db_filename, check_same_thread=False)
+        self.db_filename = db_filename
+        self.conn = sqlite3.connect(self.db_filename, check_same_thread=False)
         self.cursor = self.conn.cursor()
 
         # Create users table with an additional column for publicKey
@@ -20,10 +21,13 @@ class DatabaseManager:
         ''')
         self.conn.commit()
 
-    def __del__(self):
-        self.conn.close()
+    def close_connection(self):
+        """Close the database connection explicitly."""
+        if self.conn:
+            self.conn.close()
+            self.conn = None
 
-    def add_user(self, name, last_name, phone_number, password, public_key=None):
+    def add_user(self, name, last_name, phone_number, password, public_key):
         # Check if the phone number already exists
         if self.get_user_by_phone_number(phone_number):
             error_message = "Error: Phone number already exists."
@@ -46,7 +50,6 @@ class DatabaseManager:
             print(error_message)
             return error_message
 
-    # Retrieve user details by phone number, including publicKey
     def get_user_by_phone_number(self, phone_number):
         self.cursor.execute('''
             SELECT name, last_name, phone_number, password, public_key, created_at
