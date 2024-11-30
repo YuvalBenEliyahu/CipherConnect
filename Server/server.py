@@ -20,19 +20,20 @@ message_handler = MessageHandler(db_manager, clients)
 
 def handle_client(client_socket, client_address):
     try:
-        data = client_socket.recv(BUFFER_SIZE).decode()
-        if not data:
-            return
+        while True:
+            data = client_socket.recv(BUFFER_SIZE).decode()
+            if not data:
+                break
 
-        # Parse JSON data
-        try:
-            request = json.loads(data)
-        except json.JSONDecodeError:
-            client_socket.send("ERROR: Invalid JSON format.".encode())
-            return
+            # Parse JSON data
+            try:
+                request = json.loads(data)
+            except json.JSONDecodeError:
+                client_socket.send("ERROR: Invalid JSON format.".encode())
+                continue
 
-        # Handle the message using the MessageHandler instance
-        message_handler.handle_message(request, client_socket, client_address)
+            # Handle the message using the MessageHandler instance
+            message_handler.handle_message(request, client_socket, client_address)
 
     except KeyError as e:
         logging.error(f"KeyError: {e}")

@@ -57,6 +57,26 @@ class TestClientServerRegistration(unittest.TestCase):
         finally:
             client_socket.close()
 
+    def test_registration_existing_user(self):
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            client_socket.connect((HOST, PORT))
+            public_key_pem = generate_public_key()
+            registration_data = json.dumps({
+                "command": "REGISTER",
+                "data": {
+                    "first_name": "John",
+                    "last_name": "Doe",
+                    "phone_number": "1234567890",
+                    "password": "Password1$",
+                    "public_key": public_key_pem
+                }
+            })
+            client_socket.sendall(registration_data.encode(ENCODE))
+            response = client_socket.recv(BUFFER_SIZE).decode(ENCODE)
+            self.assertEqual(response, "ERROR: Phone number already exists.")
+        finally:
+            client_socket.close()
 
 if __name__ == '__main__':
     unittest.main()

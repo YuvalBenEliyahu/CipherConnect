@@ -20,3 +20,5 @@ Client/Data/public_key.pem
 
 Client/client_chats.db
 
+/Client/client_chat
+/Client/client_chats
