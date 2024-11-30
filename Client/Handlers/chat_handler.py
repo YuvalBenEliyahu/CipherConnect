@@ -1,11 +1,19 @@
 import json
 from datetime import datetime
+from enum import Enum
 
 from Client.config import BUFFER_SIZE, ENCODE
 from Client.Database.Database import ClientDatabaseManager
 
 db_manager = ClientDatabaseManager()
 
+
+class MessageType(Enum):
+    LOGIN_SUCCESS = "LOGIN_SUCCESS"
+    REGISTRATION_SUCCESS = "REGISTRATION_SUCCESS"
+    MESSAGE_SUCCESS = "MESSAGE_SUCCESS"
+    SUCCESS = "SUCCESS"
+    ERROR = "ERROR"
 
 def send_message(client_socket, to_phone_number):
     """Send a message to a specific user."""
@@ -42,20 +50,20 @@ def receive_messages(client_socket):
             message_data = json.loads(data)
             message_type = message_data.get("type")
 
-            if message_type == "LOGIN_SUCCESS":
+            if message_type == MessageType.LOGIN_SUCCESS.value:
                 print("Login successful!")
-            elif message_type == "REGISTRATION_SUCCESS":
+            elif message_type == MessageType.REGISTRATION_SUCCESS.value:
                 print("Registration successful!")
-            elif message_type == "MESSAGE_SUCCESS":
+            elif message_type == MessageType.MESSAGE_SUCCESS.value:
                 sender_phone_number = message_data.get("sender_phone_number")
                 message = message_data.get("message")
                 timestamp = message_data.get("timestamp")
                 if sender_phone_number and message:
                     db_manager.add_chat_message(sender_phone_number, f"{sender_phone_number}: {message}", timestamp)
                     print_chat(sender_phone_number)
-            elif message_type == "SUCCESS":
+            elif message_type == MessageType.SUCCESS.value:
                 print(f"Server response: {message_data.get('message')}")
-            elif message_type == "ERROR":
+            elif message_type == MessageType.ERROR.value:
                 print(f"Server error: {message_data.get('message')}")
             else:
                 print(f"Unknown message type: {message_type}")
@@ -108,6 +116,7 @@ def navigate_chats(client_socket):
             send_message(client_socket, phone_number)
         else:
             print("Invalid option. Please try again.")
+
 
 def print_chat(phone_number):
     """Print the chat with a specific user."""
