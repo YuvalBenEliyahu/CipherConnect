@@ -31,12 +31,10 @@ def start_client(host=HOST, port=PORT):
 
                     if option == "1":
                         register(client_socket)
+                        break
                     elif option == "2":
-                        if login(client_socket):
-                            print("Login successful! Returning to main menu.")
-                            break
-                        else:
-                            print("Login failed. Please try again.")
+                        login(client_socket)
+                        break
                     elif option == "3":
                         navigate_chats(client_socket)
                     else:
