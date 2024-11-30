@@ -1,4 +1,5 @@
 import json
+import threading
 
 from Client.config import BUFFER_SIZE, ENCODE
 from Client.Database.Database import ClientDatabaseManager
@@ -21,6 +22,25 @@ def send_message(client_socket, to_phone_number):
     print(f"Server response: {response}")
     db_manager.add_chat_message(to_phone_number, f"You: {message}")
     print_chat(to_phone_number)
+
+
+def receive_messages(client_socket):
+    """Receive messages from the server."""
+    while True:
+        try:
+            data = client_socket.recv(BUFFER_SIZE).decode(ENCODE)
+            if not data:
+                break
+
+            message_data = json.loads(data)
+            sender_phone_number = message_data.get("sender_phone_number")
+            message = message_data.get("message")
+            if sender_phone_number and message:
+                db_manager.add_chat_message(sender_phone_number, f"{sender_phone_number}: {message}")
+                print_chat(sender_phone_number)
+        except Exception as e:
+            print(f"An error occurred while receiving messages: {e}")
+            break
 
 
 def view_chats():

@@ -1,8 +1,9 @@
 import socket
 import sys
+import threading
 
 from Client.Handlers.login_handler import login
-from Client.Handlers.chat_handler import navigate_chats
+from Client.Handlers.chat_handler import navigate_chats, receive_messages
 from Client.Handlers.register_handler import register
 from Client.config import PORT, HOST
 
@@ -13,6 +14,11 @@ def start_client(host=HOST, port=PORT):
         try:
             client_socket.connect((host, port))
             print(f"Connected to server at {host}:{port}")
+
+            # Start a thread to receive messages
+            receive_thread = threading.Thread(target=receive_messages, args=(client_socket,))
+            receive_thread.daemon = True
+            receive_thread.start()
 
             while True:
                 # Display menu
