@@ -1,8 +1,12 @@
 import socket
 import threading
 import logging
+
+from Server.Database.Clients import Clients
 from Server.Database.Database import DatabaseManager
+from Server.Handlers.ReceiveMessageHandler import ReceiveMessage
 from Server.Handlers.RegistrationHandler import RegistrationHandler
+from Server.Handlers.SendMessageHandler import SendMessageHandler
 
 from Server.config import HOST, PORT, BUFFER_SIZE
 import json
@@ -10,13 +14,16 @@ import json
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
-
 from Server.Handlers.LoginHandler import LoginHandler
 
 # Initialize the database and handlers
 db_manager = DatabaseManager()
+clients = Clients(db_manager)
 registration_handler = RegistrationHandler(db_manager)
-login_handler = LoginHandler(db_manager)
+login_handler = LoginHandler(db_manager, clients)
+send_message_handler = SendMessageHandler(db_manager, clients)
+receive_message_handler = ReceiveMessage(clients, send_message_handler)
+
 
 def handle_client(client_socket, client_address):
     try:
@@ -47,6 +54,10 @@ def handle_client(client_socket, client_address):
             payload_json = json.dumps(payload)
             response = login_handler.handle_login(payload_json, client_address, client_socket)
             client_socket.send(response.encode())
+        elif command == "MESSAGE":
+            payload_json = json.dumps(payload)
+            response = receive_message_handler.handle_message(client_socket, payload_json)
+            client_socket.send(response.encode())
         else:
             client_socket.send(f"ERROR: Unknown command '{command}'.".encode())
     except KeyError as e:
@@ -57,6 +68,7 @@ def handle_client(client_socket, client_address):
         client_socket.send(f"ERROR: {str(e)}".encode())
     finally:
         client_socket.close()
+
 
 def start_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

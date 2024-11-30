@@ -43,3 +43,9 @@ class Clients:
 
     def get_connected_user(self, phone_number):
         return self.connected_users.get(phone_number)
+
+    def get_phone_number_by_connection(self, connection):
+        for phone_number, conn in self.connected_users.items():
+            if conn == connection:
+                return phone_number
+        return None

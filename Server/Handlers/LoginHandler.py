@@ -1,13 +1,13 @@
 import json
 import logging
-from Server.Handlers.MessageHandler import MessageHandler
+from Server.Handlers.SendMessageHandler import SendMessageHandler
 
 
 class LoginHandler:
     def __init__(self, db_manager, clients):
         self.db_manager = db_manager
         self.clients = clients
-        self.message_handler = MessageHandler(db_manager, clients)
+        self.message_handler = SendMessageHandler(db_manager, clients)
 
     def handle_login(self, payload, client_address, connection):
         logging.debug("Handling login with payload: %s from %s", payload, client_address)
