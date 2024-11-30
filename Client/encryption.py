@@ -12,6 +12,7 @@ public_key_file = 'Data/public_key.pem'
 # Define a password for encryption
 password = b"your-secure-password"
 
+
 # Function to generate and save keys
 def generate_and_save_keys():
     # Ensure the directory exists
