@@ -37,6 +37,7 @@ def start_client(host=HOST, port=PORT):
                         break
                     elif option == "3":
                         navigate_chats(client_socket)
+                        break
                     else:
                         print("Invalid option. Please try again.")
             except ConnectionRefusedError:
