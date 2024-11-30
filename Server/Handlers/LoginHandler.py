@@ -1,3 +1,4 @@
+
 import logging
 from Server.Handlers.MessageType import MessageType
 
@@ -34,8 +35,7 @@ class LoginHandler:
             logging.error(f"Exception during login handling: {e}")
             self.send_message_handler.send_response(connection, MessageType.ERROR.value, "Internal server error.")
         finally:
-            logging.debug("Closing connection for client: %s", client_address)
-            connection.close()
+            logging.debug("Finished handling login for client: %s", client_address)
 
     def validate_login_data(self, phone_number, password, client_address):
         if not phone_number or not password:

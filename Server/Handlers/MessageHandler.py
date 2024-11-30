@@ -1,5 +1,9 @@
 import json
+
+from Server.Handlers.LoginHandler import LoginHandler
 from Server.Handlers.MessageType import MessageType
+from Server.Handlers.ReceiveMessageHandler import ReceiveMessageHandler
+from Server.Handlers.RegistrationHandler import RegistrationHandler
 from Server.Handlers.SendMessageHandler import SendMessageHandler
 
 class MessageHandler:
@@ -24,15 +28,12 @@ class MessageHandler:
             return
 
         if type == MessageType.REGISTER.value:
-            from Server.Handlers.RegistrationHandler import RegistrationHandler
             registration_handler = RegistrationHandler(self.db_manager, self.clients, self.send_message_handler)
             registration_handler.handle(payload, client_address, client_socket)
         elif type == MessageType.LOGIN.value:
-            from Server.Handlers.LoginHandler import LoginHandler
             login_handler = LoginHandler(self.db_manager, self.clients, self.send_message_handler)
             login_handler.handle(payload, client_address, client_socket)
         elif type == MessageType.MESSAGE.value:
-            from Server.Handlers.ReceiveMessageHandler import ReceiveMessageHandler
             receive_message_handler = ReceiveMessageHandler(self.db_manager, self.clients, self.send_message_handler)
             receive_message_handler.handle(payload, client_address, client_socket)
         else:

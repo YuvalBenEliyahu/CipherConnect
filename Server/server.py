@@ -21,29 +21,37 @@ message_handler = MessageHandler(db_manager, clients)
 def handle_client(client_socket, client_address):
     try:
         while True:
-            data = client_socket.recv(BUFFER_SIZE).decode()
-            if not data:
-                break
-
-            # Parse JSON data
             try:
-                request = json.loads(data)
-            except json.JSONDecodeError:
-                client_socket.send("ERROR: Invalid JSON format.".encode())
-                continue
+                data = client_socket.recv(BUFFER_SIZE).decode()
+                if not data:
+                    break
 
-            # Handle the message using the MessageHandler instance
-            message_handler.handle_message(request, client_socket, client_address)
+                try:
+                    request = json.loads(data)
+                except json.JSONDecodeError:
+                    client_socket.send("ERROR: Invalid JSON format.".encode())
+                    continue
 
-    except KeyError as e:
-        logging.error(f"KeyError: {e}")
-        client_socket.send(f"ERROR: KeyError - {str(e)}".encode())
+                message_handler.handle_message(request, client_socket, client_address)
+            except OSError as e:
+                logging.error(f"OSError: {e}")
+                break
     except Exception as e:
         logging.error(f"Exception: {e}")
-        client_socket.send(f"ERROR: {str(e)}".encode())
+        try:
+            client_socket.send(f"ERROR: {str(e)}".encode())
+        except OSError as send_error:
+            logging.error(f"Failed to send error message: {send_error}")
     finally:
         logging.debug("Closing client socket for address: %s", client_address)
-        client_socket.close()
+        phone_number = clients.get_phone_number_by_connection(client_socket)
+        if phone_number:
+            clients.remove_connected_user(phone_number)
+        if client_socket:
+            try:
+                client_socket.close()
+            except OSError as close_error:
+                logging.error(f"Failed to close client socket: {close_error}")
 
 def start_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
