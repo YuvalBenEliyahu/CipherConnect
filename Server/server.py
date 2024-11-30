@@ -5,7 +5,8 @@ import json
 
 from Server.Database.Clients import Clients
 from Server.Database.Database import DatabaseManager
-from Server.Handlers.ReceiveMessageHandler import ReceiveMessage
+from Server.Handlers.ReceiveMessageHandler import ReceiveMessageHandler
+
 from Server.Handlers.RegistrationHandler import RegistrationHandler
 from Server.Handlers.SendMessageHandler import SendMessageHandler
 from Server.config import HOST, PORT, BUFFER_SIZE
@@ -17,10 +18,10 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %
 # Initialize the database and handlers
 db_manager = DatabaseManager()
 clients = Clients(db_manager)
-registration_handler = RegistrationHandler(db_manager)
+registration_handler = RegistrationHandler(db_manager, clients)
 login_handler = LoginHandler(db_manager, clients)
 send_message_handler = SendMessageHandler(db_manager, clients)
-receive_message_handler = ReceiveMessage(clients, send_message_handler)
+receive_message_handler = ReceiveMessageHandler(clients, send_message_handler)
 
 def handle_client(client_socket, client_address):
     try:
@@ -35,28 +36,28 @@ def handle_client(client_socket, client_address):
             client_socket.send("ERROR: Invalid JSON format.".encode())
             return
 
-        command = request.get("command")
+        type = request.get("type")
         payload = request.get("data")
 
-        if not command or not payload:
-            client_socket.send("ERROR: Missing command or payload.".encode())
+        if not type or not payload:
+            client_socket.send("ERROR: Missing type or payload.".encode())
             return
 
-        # Handle the command
-        if command == "REGISTER":
+        # Handle the type
+        if type == "REGISTER":
             payload_json = json.dumps(payload)
             response = registration_handler.handle_registration(payload_json, client_address)
             client_socket.send(response.encode())
-        elif command == "LOGIN":
+        elif type == "LOGIN":
             payload_json = json.dumps(payload)
             response = login_handler.handle_login(payload_json, client_address, client_socket)
             client_socket.send(response.encode())
-        elif command == "MESSAGE":
+        elif type == "MESSAGE":
             payload_json = json.dumps(payload)
             response = receive_message_handler.handle_message(client_socket, payload_json)
             client_socket.send(response.encode())
         else:
-            client_socket.send(f"ERROR: Unknown command '{command}'.".encode())
+            client_socket.send(f"ERROR: Unknown type '{type}'.".encode())
     except KeyError as e:
         logging.error(f"KeyError: {e}")
         client_socket.send(f"ERROR: KeyError - {str(e)}".encode())
