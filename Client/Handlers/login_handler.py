@@ -1,20 +1,12 @@
 import json
 from Client.config import BUFFER_SIZE, ENCODE
+from Client.utils import get_input, validate_non_empty, validate_phone_number
 
 
 def login(client_socket):
     """Login the client with the server."""
-    while True:
-        phone_number = input("Enter your phone number: ").strip()
-        if phone_number.isdigit():
-            break
-        print("Phone number must be numeric. Please try again.")
-
-    while True:
-        password = input("Enter your password: ").strip()
-        if password:
-            break
-        print("Password cannot be empty. Please try again.")
+    phone_number = get_input("Enter your phone number: ", validate_phone_number, "Phone number must be 10 digits long and start with '05'. Please try again.")
+    password = get_input("Enter your password: ", validate_non_empty, "Password cannot be empty. Please try again.")
 
     data = json.dumps({
         "type": "LOGIN",

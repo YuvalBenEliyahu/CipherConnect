@@ -1,9 +1,10 @@
 import sqlite3
-from datetime import datetime
+
+from Client.config import CLIENT_CHAT_TABLE
 
 
 class ClientDatabaseManager:
-    def __init__(self, db_filename="client_chats.db"):
+    def __init__(self, db_filename=CLIENT_CHAT_TABLE):
         self.db_filename = db_filename
         self.conn = sqlite3.connect(self.db_filename, check_same_thread=False)
         self.cursor = self.conn.cursor()
