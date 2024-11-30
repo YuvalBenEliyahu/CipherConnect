@@ -1,20 +1,18 @@
 import socket
 import threading
 import logging
+import json
 
 from Server.Database.Clients import Clients
 from Server.Database.Database import DatabaseManager
 from Server.Handlers.ReceiveMessageHandler import ReceiveMessage
 from Server.Handlers.RegistrationHandler import RegistrationHandler
 from Server.Handlers.SendMessageHandler import SendMessageHandler
-
 from Server.config import HOST, PORT, BUFFER_SIZE
-import json
+from Server.Handlers.LoginHandler import LoginHandler
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-
-from Server.Handlers.LoginHandler import LoginHandler
 
 # Initialize the database and handlers
 db_manager = DatabaseManager()
@@ -23,7 +21,6 @@ registration_handler = RegistrationHandler(db_manager)
 login_handler = LoginHandler(db_manager, clients)
 send_message_handler = SendMessageHandler(db_manager, clients)
 receive_message_handler = ReceiveMessage(clients, send_message_handler)
-
 
 def handle_client(client_socket, client_address):
     try:
@@ -69,7 +66,6 @@ def handle_client(client_socket, client_address):
     finally:
         client_socket.close()
 
-
 def start_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((HOST, PORT))
@@ -80,7 +76,7 @@ def start_server():
         while True:
             client_socket, client_address = server_socket.accept()
             logging.info(f"New connection from {client_address}")
-            thread = threading.Thread(target=handle_client, args=(client_socket, client_address, server_socket))
+            thread = threading.Thread(target=handle_client, args=(client_socket, client_address))
             thread.start()
     except Exception as e:
         logging.error(f"Server encountered an error: {e}")
