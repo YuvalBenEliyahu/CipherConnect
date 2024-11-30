@@ -19,7 +19,6 @@ def login(client_socket):
     try:
         client_socket.sendall(data.encode(ENCODE))
         response = client_socket.recv(BUFFER_SIZE).decode(ENCODE)
-        print(f"Server response: {response}")
         return response == "Login successful"
     except ConnectionAbortedError as e:
         print(f"Connection was aborted: {e}")
