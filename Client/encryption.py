@@ -6,15 +6,17 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 
 # Define file paths in the Client folder
-private_key_file = 'Client/private_key.pem'
-public_key_file = 'Client/public_key.pem'
+private_key_file = 'Client/Data/private_key.pem'
+public_key_file = 'Client/Data/public_key.pem'
 
 # Define a password for encryption
 password = b"your-secure-password"
 
-
 # Function to generate and save keys
 def generate_and_save_keys():
+    # Ensure the directory exists
+    os.makedirs(os.path.dirname(private_key_file), exist_ok=True)
+
     # Generate an ECC private key
     private_key_fl = ec.generate_private_key(
         ec.SECP256R1()
@@ -58,7 +60,6 @@ def generate_and_save_keys():
         public_key_fl.write(public_key_pem)
 
     return private_key_pem, public_key_pem
-
 
 # Check if the key files exist
 if os.path.exists(private_key_file) and os.path.exists(public_key_file):
