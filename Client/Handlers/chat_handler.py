@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 from enum import Enum
 
-from Client.config import BUFFER_SIZE, ENCODE
+from Client.config import BUFFER_SIZE, ENCODE, TIME_STAMP_FORMAT
 from Client.Database.Database import ClientDatabaseManager
 
 db_manager = ClientDatabaseManager()
@@ -15,11 +15,12 @@ class MessageType(Enum):
     SUCCESS = "SUCCESS"
     ERROR = "ERROR"
 
+
 def send_message(client_socket, to_phone_number):
     """Send a message to a specific user."""
     try:
         message = input("Enter your message: ")
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        timestamp = datetime.now().strftime(TIME_STAMP_FORMAT)
         data = json.dumps({
             "type": "MESSAGE",
             "data": {
