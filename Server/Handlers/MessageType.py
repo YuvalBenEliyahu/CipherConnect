@@ -6,4 +6,6 @@ class MessageType(Enum):
     MESSAGE_SUCCESS = "MESSAGE_SUCCESS"
     MESSAGE = "MESSAGE"
     ERROR = "ERROR"
+    LOGIN = "LOGIN"
+    REGISTER = "REGISTER"
     SUCCESS = "SUCCESS"

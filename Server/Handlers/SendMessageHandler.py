@@ -1,12 +1,17 @@
 import json
 import logging
 
-from datetime import datetime
-from Server.Handlers.MessageHandler import MessageHandler
 from Server.Handlers.MessageType import MessageType
 
+class SendMessageHandler:
+    def __init__(self, db_manager, clients):
+        self.db_manager = db_manager
+        self.clients = clients
 
-class SendMessageHandler(MessageHandler):
+    def send_response(self, connection, message_type, message):
+        response = json.dumps({"type": message_type, "message": message})
+        connection.sendall(response.encode('utf-8'))
+
     def send_message(self, sender_phone_number, receiver_phone_number, message, timestamp):
         receiver_connection = self.clients.get_connected_user(receiver_phone_number)
         message_data = {

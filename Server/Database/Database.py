@@ -101,3 +101,11 @@ class DatabaseManager:
         ''', (receiver_phone_number,))
         self.conn.commit()
         return messages
+
+    def delete_offline_messages(self, receiver_phone_number):
+        """Delete offline messages for a specific receiver."""
+        self.cursor.execute('''
+            DELETE FROM offline_messages
+            WHERE receiver_phone_number = ?
+        ''', (receiver_phone_number,))
+        self.conn.commit()
