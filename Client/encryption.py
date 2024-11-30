@@ -6,8 +6,8 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 
 # Define file paths in the Client folder
-private_key_file = 'Client/Data/private_key.pem'
-public_key_file = 'Client/Data/public_key.pem'
+private_key_file = 'Data/private_key.pem'
+public_key_file = 'Data/public_key.pem'
 
 # Define a password for encryption
 password = b"your-secure-password"

@@ -18,4 +18,5 @@ Server/Test/users.db
 Client/Data/private_key.pem
 Client/Data/public_key.pem
 
+Client/client_chats.db
 
