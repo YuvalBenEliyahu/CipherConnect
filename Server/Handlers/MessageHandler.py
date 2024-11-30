@@ -1,0 +1,36 @@
+import json
+import logging
+from datetime import datetime
+
+
+class MessageHandler:
+    def __init__(self, db_manager, clients):
+        self.db_manager = db_manager
+        self.clients = clients
+
+    def send_message(self, sender_phone_number, receiver_phone_number, message):
+        receiver_connection = self.clients.get_connected_user(receiver_phone_number)
+        if receiver_connection:
+            # Send message to the connected user
+            message_data = json.dumps({
+                "sender": sender_phone_number,
+                "message": message,
+                "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            })
+            receiver_connection.sendall(message_data.encode('utf-8'))
+            logging.info("Message sent to %s", receiver_phone_number)
+            return json.dumps({"status": "SUCCESS", "message": "Message delivered"})
+        else:
+            # Save message as offline
+            self.db_manager.add_offline_message(sender_phone_number, receiver_phone_number, message)
+            logging.info("User %s is offline. Message saved.", receiver_phone_number)
+            return json.dumps({"status": "SUCCESS", "message": "User is offline. Message saved."})
+
+    def send_offline_messages(self, phone_number):
+        offline_messages = self.db_manager.get_offline_messages(phone_number)
+        if offline_messages:
+            messages = [{"sender": msg[0], "message": msg[1], "timestamp": msg[2]} for msg in offline_messages]
+            logging.info("Sending offline messages to %s", phone_number)
+            return json.dumps({"status": "SUCCESS", "messages": messages})
+        else:
+            return json.dumps({"status": "SUCCESS", "messages": []})

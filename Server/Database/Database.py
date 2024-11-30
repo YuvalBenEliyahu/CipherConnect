@@ -21,6 +21,18 @@ class DatabaseManager:
         ''')
         self.conn.commit()
 
+        self.cursor.execute('''
+               CREATE TABLE IF NOT EXISTS offline_messages (
+                   id INTEGER PRIMARY KEY AUTOINCREMENT,
+                   sender_phone_number TEXT NOT NULL,
+                   receiver_phone_number TEXT NOT NULL,
+                   message TEXT NOT NULL,
+                   timestamp TEXT NOT NULL,
+                   FOREIGN KEY (receiver_phone_number) REFERENCES users(phone_number)
+               )
+           ''')
+        self.conn.commit()
+
     def close_connection(self):
         """Close the database connection explicitly."""
         if self.conn:
@@ -67,3 +79,25 @@ class DatabaseManager:
                 "created_at": result[5]
             }
         return None
+
+    def add_offline_message(self, sender_phone_number, receiver_phone_number, message):
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        self.cursor.execute('''
+            INSERT INTO offline_messages (sender_phone_number, receiver_phone_number, message, timestamp)
+            VALUES (?, ?, ?, ?)
+        ''', (sender_phone_number, receiver_phone_number, message, timestamp))
+        self.conn.commit()
+
+    def get_offline_messages(self, receiver_phone_number):
+        self.cursor.execute('''
+            SELECT sender_phone_number, message, timestamp
+            FROM offline_messages
+            WHERE receiver_phone_number = ?
+        ''', (receiver_phone_number,))
+        messages = self.cursor.fetchall()
+        self.cursor.execute('''
+            DELETE FROM offline_messages
+            WHERE receiver_phone_number = ?
+        ''', (receiver_phone_number,))
+        self.conn.commit()
+        return messages

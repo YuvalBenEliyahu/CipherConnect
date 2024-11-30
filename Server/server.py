@@ -11,7 +11,7 @@ import json
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-from Server.Handlers.login_handler import LoginHandler
+from Server.Handlers.LoginHandler import LoginHandler
 
 # Initialize the database and handlers
 db_manager = DatabaseManager()
@@ -45,7 +45,7 @@ def handle_client(client_socket, client_address):
             client_socket.send(response.encode())
         elif command == "LOGIN":
             payload_json = json.dumps(payload)
-            response = login_handler.handle_login(payload_json, client_address)
+            response = login_handler.handle_login(payload_json, client_address, client_socket)
             client_socket.send(response.encode())
         else:
             client_socket.send(f"ERROR: Unknown command '{command}'.".encode())
