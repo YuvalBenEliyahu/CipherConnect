@@ -1,6 +1,7 @@
 import socket
 import sys
 
+from Client.Handlers.login_handler import login
 from Client.Handlers.message_handler import send_message
 from Client.Handlers.register_handler import register
 from Client.config import PORT, HOST
@@ -17,12 +18,15 @@ def start_client(host=HOST, port=PORT):
                 # Display menu
                 print("\nOptions:")
                 print("1. Register")
-                print("2. Send message")
-                option = input("Choose an option (1/2): ")
+                print("2. Login")
+                print("3. Send message")
+                option = input("Choose an option (1/2/3): ")
 
                 if option == "1":
                     register(client_socket)
                 elif option == "2":
+                    login(client_socket)
+                elif option == "3":
                     send_message(client_socket)
                 else:
                     print("Invalid option. Please try again.")
