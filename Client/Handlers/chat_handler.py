@@ -33,11 +33,20 @@ def receive_messages(client_socket):
                 break
 
             message_data = json.loads(data)
-            sender_phone_number = message_data.get("sender_phone_number")
-            message = message_data.get("message")
-            if sender_phone_number and message:
-                db_manager.add_chat_message(sender_phone_number, f"{sender_phone_number}: {message}")
-                print_chat(sender_phone_number)
+            message_type = message_data.get("type")
+
+            if message_type == "LOGIN_SUCCESS":
+                print("Login successful!")
+            elif message_type == "REGISTRATION_SUCCESS":
+                print("Registration successful!")
+            elif message_type == "MESSAGE":
+                sender_phone_number = message_data.get("sender_phone_number")
+                message = message_data.get("message")
+                if sender_phone_number and message:
+                    db_manager.add_chat_message(sender_phone_number, f"{sender_phone_number}: {message}")
+                    print_chat(sender_phone_number)
+            else:
+                print(f"Unknown message type: {message_type}")
         except Exception as e:
             print(f"An error occurred while receiving messages: {e}")
             break
