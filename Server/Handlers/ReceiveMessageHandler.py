@@ -32,5 +32,5 @@ class ReceiveMessageHandler:
         return None
 
     def forward_message(self, sender_phone_number, receiver_phone_number, message, timestamp):
-        response = self.send_message_handler.send_message(sender_phone_number, receiver_phone_number, message, timestamp)
+        response = self.send_message_handler.send_chat_message(sender_phone_number, receiver_phone_number, message, timestamp)
         logging.info("Forwarded message from %s to %s: %s", sender_phone_number, receiver_phone_number, response)

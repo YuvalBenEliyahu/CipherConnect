@@ -1,4 +1,5 @@
 import json
+import queue
 from datetime import datetime
 from enum import Enum
 
@@ -16,7 +17,7 @@ class MessageType(Enum):
     ERROR = "ERROR"
 
 
-def send_message(client_socket, to_phone_number):
+def send_chat_message(client_socket, to_phone_number, message_queue):
     """Send a message to a specific user."""
     try:
         message = input("Enter your message: ")
@@ -30,48 +31,21 @@ def send_message(client_socket, to_phone_number):
             }
         })
         client_socket.sendall(data.encode(ENCODE))
-        response = client_socket.recv(BUFFER_SIZE).decode(ENCODE)
-        print(f"Server response: {response}")
-        db_manager.add_chat_message(to_phone_number, f"You: {message}", timestamp)
-        print_chat(to_phone_number)
+
+        # Wait for server response
+        try:
+            response = message_queue.get(timeout=5)
+            if response.get("type") == MessageType.MESSAGE_SUCCESS.value:
+                print(f"Message sent to {to_phone_number}!")
+                db_manager.add_chat_message(to_phone_number, f"You: {message}", timestamp)
+            elif response.get("type") == MessageType.ERROR.value:
+                print(f"Failed to send message: {response.get('message')}")
+        except queue.Empty:
+            print("No response from server. Please try again later.")
     except ConnectionAbortedError as e:
         print(f"Connection was aborted: {e}")
     except Exception as e:
         print(f"An error occurred: {e}")
-
-
-def receive_messages(client_socket):
-    """Receive messages from the server."""
-    while True:
-        try:
-            data = client_socket.recv(BUFFER_SIZE).decode(ENCODE)
-            if not data:
-                break
-
-            message_data = json.loads(data)
-            message_type = message_data.get("type")
-
-            if message_type == MessageType.LOGIN_SUCCESS.value:
-                print("Login successful!")
-            elif message_type == MessageType.REGISTRATION_SUCCESS.value:
-                print("Registration successful!")
-            elif message_type == MessageType.MESSAGE_SUCCESS.value:
-                sender_phone_number = message_data.get("sender_phone_number")
-                message = message_data.get("message")
-                timestamp = message_data.get("timestamp")
-                if sender_phone_number and message:
-                    db_manager.add_chat_message(sender_phone_number, f"{sender_phone_number}: {message}", timestamp)
-                    print_chat(sender_phone_number)
-            elif message_type == MessageType.SUCCESS.value:
-                print(f"Server response: {message_data.get('message')}")
-            elif message_type == MessageType.ERROR.value:
-                print(f"Server error: {message_data.get('message')}")
-            else:
-                print(f"Unknown message type: {message_type}")
-
-        except Exception as e:
-            print(f"An error occurred while receiving messages: {e}")
-            break
 
 
 def view_chats():
@@ -86,7 +60,7 @@ def view_chats():
     return phone_numbers
 
 
-def navigate_chats(client_socket):
+def navigate_chats(client_socket, message_queue):
     """Navigate between chats and send messages."""
     while True:
         phone_numbers = view_chats()
@@ -114,9 +88,10 @@ def navigate_chats(client_socket):
         elif option == '1':
             phone_number = input("Enter phone number to view chat: ").strip()
             print_chat(phone_number)
-            send_message(client_socket, phone_number)
+            send_chat_message(client_socket, phone_number, message_queue)
         else:
             print("Invalid option. Please try again.")
+
 
 
 def print_chat(phone_number):
