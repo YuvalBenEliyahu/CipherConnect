@@ -33,7 +33,7 @@ class MessageHandler:
         elif type == MessageType.LOGIN.value:
             login_handler = LoginHandler(self.db_manager, self.clients, self.send_message_handler)
             login_handler.handle(payload, client_address, client_socket)
-        elif type == MessageType.MESSAGE.value:
+        elif type == MessageType.OUTGOING_CHAT_MESSAGE.value:
             receive_message_handler = ReceiveMessageHandler(self.db_manager, self.clients, self.send_message_handler)
             receive_message_handler.handle(payload, client_address, client_socket)
         else:

@@ -18,8 +18,9 @@ class ReceiveMessageHandler:
                 self.send_message_handler.send_response(connection, MessageType.ERROR.value, "Invalid message format.")
                 return
 
+            logging.info("Received message from %s to %s: %s", sender_phone_number, receiver_phone_number, message)
             self.forward_message(sender_phone_number, receiver_phone_number, message, timestamp)
-            self.send_message_handler.send_response(connection, MessageType.MESSAGE_SUCCESS.value, "Message processed.")
+            self.send_message_handler.send_response(connection, MessageType.OUTGOING_CHAT_MESSAGE_SUCCESS.value, "Message processed.")
         except Exception as e:
             logging.error(f"Exception: {e}")
             self.send_message_handler.send_response(connection, MessageType.ERROR.value, str(e))
@@ -32,6 +33,4 @@ class ReceiveMessageHandler:
         return None
 
     def forward_message(self, sender_phone_number, receiver_phone_number, message, timestamp):
-        response = self.send_message_handler.send_message(sender_phone_number, receiver_phone_number, message, timestamp)
-        logging.info("Forwarded message from %s to %s: %s", sender_phone_number, receiver_phone_number, response)
-        logging.info("Message received from %s to %s: %s", sender_phone_number, receiver_phone_number, message)
+        self.send_message_handler.send_message(sender_phone_number, receiver_phone_number, message, timestamp)
