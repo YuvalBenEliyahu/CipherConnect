@@ -1,5 +1,6 @@
 import json
-from Client.Handlers.chat_handler import MessageType
+
+from Client.Handlers.message_type import MessageType
 from Client.config import ENCODE
 from Client.encryption import public_key_pem
 from Client.utils import get_input, validate_non_empty, validate_phone_number
