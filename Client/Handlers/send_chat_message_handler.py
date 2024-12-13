@@ -13,7 +13,7 @@ def send_chat_message(client_socket, to_phone_number, message_queue):
         message = input("Enter your message: ")
         timestamp = datetime.now().strftime(TIME_STAMP_FORMAT)
         data = json.dumps({
-            "type": "MESSAGE",
+            "type": MessageType.OUTGOING_CHAT_MESSAGE.value,
             "data": {
                 "receiver_phone_number": to_phone_number,
                 "message": message,
@@ -25,7 +25,7 @@ def send_chat_message(client_socket, to_phone_number, message_queue):
         # Wait for server response
         try:
             response = message_queue.get(timeout=5)
-            if response.get("type") == MessageType.MESSAGE_SUCCESS.value:
+            if response.get("type") == MessageType.OUTGOING_CHAT_MESSAGE_SUCCESS.value:
                 print(f"Message sent to {to_phone_number}!")
                 db_manager.add_chat_message(to_phone_number, f"You: {message}", timestamp)
             elif response.get("type") == MessageType.ERROR.value:

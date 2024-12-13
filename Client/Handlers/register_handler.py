@@ -14,7 +14,7 @@ def register(client_socket, message_queue):
     password = get_input("Enter your password: ", validate_non_empty, "Password cannot be empty. Please try again.")
 
     data = json.dumps({
-        "type": "REGISTER",
+        "type": MessageType.REGISTER.value,
         "data": {
             "first_name": first_name,
             "last_name": last_name,

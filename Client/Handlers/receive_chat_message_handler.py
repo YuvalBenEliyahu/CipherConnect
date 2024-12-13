@@ -17,7 +17,7 @@ def receive_chat_message(client_socket, message_queue):
             message_data = json.loads(data)
             message_type = message_data.get("type")
 
-            if message_type == MessageType.INCOMING_MESSAGE.value:
+            if message_type == MessageType.INCOMING_CHAT_MESSAGE.value:
                 sender_phone_number = message_data.get("sender_phone_number")
                 message = message_data.get("message")
                 timestamp = message_data.get("timestamp")

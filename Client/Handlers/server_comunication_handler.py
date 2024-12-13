@@ -22,14 +22,14 @@ def receive_server_messages(client_socket, message_queue):
                     message_queue.put(message_data)
                 elif message_type == MessageType.REGISTRATION_SUCCESS.value:
                     message_queue.put(message_data)
-                elif message_type == MessageType.OUTGOING_MESSAGE_SUCCESS.value:
+                elif message_type == MessageType.OUTGOING_CHAT_MESSAGE_SUCCESS.value:
                     sender_phone_number = message_data.get("sender_phone_number")
                     message = message_data.get("message")
                     timestamp = message_data.get("timestamp")
                     if sender_phone_number and message:
                         db_manager.add_chat_message(sender_phone_number, f"{sender_phone_number}: {message}", timestamp)
                         print_chat(sender_phone_number)
-                elif message_type == MessageType.INCOMING_MESSAGE.value:
+                elif message_type == MessageType.INCOMING_CHAT_MESSAGE.value:
                     receive_chat_message(client_socket, message_queue)
                 elif message_type == MessageType.SUCCESS.value:
                     print(f"Server response: {message_data.get('message')}")
