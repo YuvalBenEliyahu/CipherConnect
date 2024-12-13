@@ -1,10 +1,7 @@
-from Client.Database.Database import ClientDatabaseManager
 from Client.Handlers.send_chat_message_handler import send_chat_message
 
-db_manager = ClientDatabaseManager()
 
-
-def view_chats():
+def view_chats(db_manager):
     """View all chats."""
     phone_numbers = db_manager.get_all_phone_numbers_with_chats()
     if not phone_numbers:
@@ -14,11 +11,10 @@ def view_chats():
         print(f"  {phone_number}")
     return phone_numbers
 
-
-def navigate_chats(client_socket, message_queue):
+def navigate_chats(client_socket, db_manager):
     """Navigate between chats and send messages."""
     while True:
-        phone_numbers = view_chats()
+        phone_numbers = view_chats(db_manager)
         if not phone_numbers:
             print("No chats available.")
             print("Options:")
@@ -30,7 +26,7 @@ def navigate_chats(client_socket, message_queue):
                 break
             elif option == '1':
                 phone_number = input("Enter phone number to start a new chat: ").strip()
-                send_chat_message(client_socket, phone_number, message_queue)
+                send_chat_message(client_socket, phone_number, db_manager)
             else:
                 print("Invalid option. Please try again.")
         else:
@@ -56,16 +52,15 @@ def navigate_chats(client_socket, message_queue):
                     print("Invalid phone number. Please try again.")
             elif option == '1':
                 phone_number = input("Enter phone number to view chat: ").strip()
-                print_chat(phone_number)
-                send_chat_message(client_socket, phone_number, message_queue)
+                print_chat(phone_number, db_manager)
+                send_chat_message(client_socket, phone_number, db_manager)
             elif option == '4':
                 phone_number = input("Enter phone number to start a new chat: ").strip()
-                send_chat_message(client_socket, phone_number, message_queue)
+                send_chat_message(client_socket, phone_number, db_manager)
             else:
                 print("Invalid option. Please try again.")
 
-
-def print_chat(phone_number):
+def print_chat(phone_number, db_manager):
     """Print the chat with a specific user."""
     messages = db_manager.get_chat_messages(phone_number)
     if messages:

@@ -16,7 +16,7 @@ class SendMessageHandler:
         message_data = {
             "type": MessageType.INCOMING_CHAT_MESSAGE.value,
             "data": {
-                "sender": sender_phone_number,
+                "sender_phone_number": sender_phone_number,
                 "message": message,
                 "timestamp": timestamp
             }

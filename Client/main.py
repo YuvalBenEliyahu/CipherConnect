@@ -1,6 +1,8 @@
 import argparse
+
 from Client.client import start_client
 from config import HOST, PORT
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run a Python client with CLI options.")

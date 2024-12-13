@@ -1,11 +1,11 @@
 import json
-
 from Client.Handlers.message_type import MessageType
 from Client.config import ENCODE
+from Client.queue_manager import message_queue
 from Client.utils import get_input, validate_non_empty, validate_phone_number
 
 
-def login(client_socket, message_queue):
+def login(client_socket):
     """Login the client with the server."""
     phone_number = get_input("Enter your phone number: ", validate_phone_number, "Phone number must be 10 digits long and start with '05'. Please try again.")
     password = get_input("Enter your password: ", validate_non_empty, "Password cannot be empty. Please try again.")

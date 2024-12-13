@@ -1,13 +1,12 @@
 import json
 import queue
 from datetime import datetime
-
 from Client.Handlers.message_type import MessageType
 from Client.config import TIME_STAMP_FORMAT, ENCODE
-from Server.server import db_manager
+from Client.queue_manager import message_queue
 
 
-def send_chat_message(client_socket, to_phone_number, message_queue):
+def send_chat_message(client_socket, to_phone_number, db_manager):
     """Send a message to a specific user."""
     try:
         message = input("Enter your message: ")

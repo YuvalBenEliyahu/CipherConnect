@@ -13,7 +13,8 @@ class ClientDatabaseManager:
         """Create the chats table if it does not exist."""
         self.cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS {CLIENT_CHAT_TABLE} (
-                phone_number TEXT PRIMARY KEY,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                phone_number TEXT NOT NULL,
                 message TEXT NOT NULL,
                 timestamp TEXT NOT NULL
             )
@@ -25,9 +26,6 @@ class ClientDatabaseManager:
         self.cursor.execute(f'''
             INSERT INTO {CLIENT_CHAT_TABLE} (phone_number, message, timestamp)
             VALUES (?, ?, ?)
-            ON CONFLICT(phone_number) DO UPDATE SET
-            message=excluded.message,
-            timestamp=excluded.timestamp
         ''', (phone_number, message, timestamp))
         self.conn.commit()
 
