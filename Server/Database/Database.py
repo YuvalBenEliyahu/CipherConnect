@@ -8,7 +8,7 @@ class DatabaseManager:
         self.conn = sqlite3.connect(self.db_filename, check_same_thread=False)
         self.cursor = self.conn.cursor()
 
-        # Create users table with an additional column for publicKey
+        # Create users table with an additional column for salt
         self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 phone_number TEXT PRIMARY KEY,
@@ -16,6 +16,7 @@ class DatabaseManager:
                 last_name TEXT NOT NULL,
                 password TEXT NOT NULL,
                 public_key TEXT,
+                salt BLOB NOT NULL,
                 created_at TEXT NOT NULL
             )
         ''')
@@ -39,7 +40,7 @@ class DatabaseManager:
             self.conn.close()
             self.conn = None
 
-    def add_user(self, name, last_name, phone_number, password, public_key):
+    def add_user(self, name, last_name, phone_number, password, public_key, salt):
         # Check if the phone number already exists
         if self.get_user_by_phone_number(phone_number):
             error_message = "Error: Phone number already exists."
@@ -50,9 +51,9 @@ class DatabaseManager:
 
         try:
             self.cursor.execute('''
-                INSERT INTO users (phone_number, name, last_name, password, public_key, created_at)
-                VALUES (?, ?, ?, ?, ?, ?)
-            ''', (phone_number, name, last_name, password, public_key, created_at))
+                INSERT INTO users (phone_number, name, last_name, password, public_key, salt, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (phone_number, name, last_name, password, public_key, salt, created_at))
             self.conn.commit()
             success_message = f"User {name} {last_name} added successfully."
             print(success_message)
@@ -64,7 +65,7 @@ class DatabaseManager:
 
     def get_user_by_phone_number(self, phone_number):
         self.cursor.execute('''
-            SELECT name, last_name, phone_number, password, public_key, created_at
+            SELECT name, last_name, phone_number, password, public_key, salt, created_at
             FROM users
             WHERE phone_number = ?
         ''', (phone_number,))
@@ -76,7 +77,8 @@ class DatabaseManager:
                 "phone_number": result[2],
                 "password": result[3],
                 "public_key": result[4],
-                "created_at": result[5]
+                "salt": result[5],
+                "created_at": result[6]
             }
         return None
 

@@ -1,20 +1,10 @@
 import re
 from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.backends import default_backend
 from cryptography.exceptions import InvalidKey
-
-
-def pad(data, block_size):
-    padding_length = block_size - len(data) % block_size
-    return data + bytes([padding_length] * padding_length)
-
-
-def unpad(data, block_size):
-    padding_length = data[-1]
-    if padding_length > block_size:
-        raise ValueError("Invalid padding")
-    return data[:-padding_length]
-
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.backends import default_backend
+import os
 
 def password_check(passwd):
     # Check if password length is between 6 and 20 characters
@@ -38,3 +28,16 @@ def validate_public_key(pub_key):
         return True
     except (ValueError, InvalidKey):
         return False
+
+def derive_key(password, salt=None, iterations=100000):
+    if salt is None:
+        salt = os.urandom(16)  # Generate a new salt if not provided
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=salt,
+        iterations=iterations,
+        backend=default_backend()
+    )
+    key = kdf.derive(password.encode())
+    return key, salt

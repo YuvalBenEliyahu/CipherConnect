@@ -1,6 +1,8 @@
 
 import logging
 from Server.Handlers.MessageType import MessageType
+from Server.utils import derive_key
+
 
 class LoginHandler:
     def __init__(self, db_manager, clients, send_message_handler):
@@ -50,7 +52,8 @@ class LoginHandler:
         return user
 
     def validate_password(self, user, password, client_address):
-        if user["password"] != password:
+        derived_key, _ = derive_key(password, user["salt"])
+        if user["password"] != derived_key:
             logging.error("Incorrect password from %s", client_address)
             return False
         return True

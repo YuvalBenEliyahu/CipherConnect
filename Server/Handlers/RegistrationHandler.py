@@ -1,7 +1,8 @@
 import re
 import logging
 from Server.Handlers.MessageType import MessageType
-from Server.utils import password_check, validate_public_key
+from Server.utils import password_check, validate_public_key, derive_key
+
 
 class RegistrationHandler:
     def __init__(self, db_manager, clients, send_message_handler):
@@ -46,8 +47,11 @@ class RegistrationHandler:
             self.send_message_handler.send_response(connection, MessageType.ERROR.value, "Invalid public key format.")
             return
 
+        # Derive key from password
+        derived_key, salt = derive_key(password)
+
         # Add user to the database
-        result = self.db_manager.add_user(name, last_name, phone_number, password, public_key)
+        result = self.db_manager.add_user(name, last_name, phone_number, derived_key, public_key, salt)
         if "Error" in result:
             self.send_message_handler.send_response(connection, MessageType.ERROR.value, result)
         else:
