@@ -1,6 +1,15 @@
 import json
-from Client.Handlers.chat_handler import MessageType, db_manager, print_chat
+from enum import Enum
+
+from Client.Handlers.chat_handler import db_manager, print_chat
 from Client.config import BUFFER_SIZE, ENCODE
+
+class MessageType(Enum):
+    LOGIN_SUCCESS = "LOGIN_SUCCESS"
+    REGISTRATION_SUCCESS = "REGISTRATION_SUCCESS"
+    MESSAGE_SUCCESS = "MESSAGE_SUCCESS"
+    SUCCESS = "SUCCESS"
+    ERROR = "ERROR"
 
 def receive_server_messages(client_socket, message_queue):
     """Receive messages from the server and enqueue them."""

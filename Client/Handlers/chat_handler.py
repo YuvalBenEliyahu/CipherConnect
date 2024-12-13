@@ -3,18 +3,13 @@ import queue
 from datetime import datetime
 from enum import Enum
 
+from Client.Handlers.server_comunication_handler import MessageType
 from Client.config import ENCODE, TIME_STAMP_FORMAT
 from Client.Database.Database import ClientDatabaseManager
 
 db_manager = ClientDatabaseManager()
 
 
-class MessageType(Enum):
-    LOGIN_SUCCESS = "LOGIN_SUCCESS"
-    REGISTRATION_SUCCESS = "REGISTRATION_SUCCESS"
-    MESSAGE_SUCCESS = "MESSAGE_SUCCESS"
-    SUCCESS = "SUCCESS"
-    ERROR = "ERROR"
 
 
 def send_chat_message(client_socket, to_phone_number, message_queue):
