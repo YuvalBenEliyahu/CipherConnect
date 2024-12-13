@@ -33,17 +33,15 @@ def start_client(host=HOST, port=PORT):
                 print("\nOptions:")
                 print("1. Register")
                 print("2. Login")
-                print("3. Chat")
-                print("4. Exit")
-                option = input("Choose an option (1/2/3/4): ")
+                print("3. Exit")
+                option = input("Choose an option (1/2/3): ")
 
                 if option == "1":
                     register(client_socket, message_queue)
                 elif option == "2":
-                    login(client_socket, message_queue)
+                    if login(client_socket, message_queue):
+                        post_login_screen(client_socket, message_queue)
                 elif option == "3":
-                    navigate_chats(client_socket, message_queue)
-                elif option == "4":
                     print("Exiting.")
                     break
                 else:
@@ -52,3 +50,17 @@ def start_client(host=HOST, port=PORT):
             print(f"An error occurred: {e}")
         finally:
             print("Closing the client socket.")
+
+def post_login_screen(client_socket, message_queue):
+    while True:
+        print("1. Chat")
+        print("2. Logout")
+        option = input("Choose an option (1/2): ")
+
+        if option == "1":
+            navigate_chats(client_socket, message_queue)
+        elif option == "2":
+            print("Logging out.")
+            break
+        else:
+            print("Invalid option. Please try again.")

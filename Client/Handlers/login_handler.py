@@ -29,6 +29,7 @@ def login(client_socket, message_queue):
                 elif response.get("type") == MessageType.ERROR.value:
                     print(f"Login failed: {response.get('message')}")
                     break
+        return True
     except ConnectionAbortedError as e:
         print(f"Connection was aborted: {e}")
     except Exception as e:
