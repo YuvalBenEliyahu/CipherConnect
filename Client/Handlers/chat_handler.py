@@ -3,7 +3,7 @@ import queue
 from datetime import datetime
 from enum import Enum
 
-from Client.config import BUFFER_SIZE, ENCODE, TIME_STAMP_FORMAT
+from Client.config import ENCODE, TIME_STAMP_FORMAT
 from Client.Database.Database import ClientDatabaseManager
 
 db_manager = ClientDatabaseManager()
@@ -52,7 +52,6 @@ def view_chats():
     """View all chats."""
     phone_numbers = db_manager.get_all_phone_numbers_with_chats()
     if not phone_numbers:
-        print("No chats available.")
         return []
     print("Available chats:")
     for phone_number in phone_numbers:
@@ -65,33 +64,49 @@ def navigate_chats(client_socket, message_queue):
     while True:
         phone_numbers = view_chats()
         if not phone_numbers:
-            break
-        print("Options:")
-        print("1. Enter phone number to view chat")
-        print("2. Enter phone number to delete chat")
-        print("3. Delete all chats")
-        print("4. Go back")
-        option = input("Choose an option (1/2/3/4): ").strip()
+            print("No chats available.")
+            print("Options:")
+            print("1. Start a new chat")
+            print("2. Go back")
+            option = input("Choose an option (1/2): ").strip()
 
-        if option == '4':
-            break
-        elif option == '3':
-            db_manager.delete_all_chats()
-            print("All chats deleted.")
-        elif option == '2':
-            phone_number = input("Enter phone number to delete chat: ").strip()
-            if phone_number in phone_numbers:
-                db_manager.delete_chat(phone_number)
-                print(f"Chat with {phone_number} deleted.")
+            if option == '2':
+                break
+            elif option == '1':
+                phone_number = input("Enter phone number to start a new chat: ").strip()
+                send_chat_message(client_socket, phone_number, message_queue)
             else:
-                print("Invalid phone number. Please try again.")
-        elif option == '1':
-            phone_number = input("Enter phone number to view chat: ").strip()
-            print_chat(phone_number)
-            send_chat_message(client_socket, phone_number, message_queue)
+                print("Invalid option. Please try again.")
         else:
-            print("Invalid option. Please try again.")
+            print("Options:")
+            print("1. Enter phone number to view chat")
+            print("2. Enter phone number to delete chat")
+            print("3. Delete all chats")
+            print("4. Start a new chat")
+            print("5. Go back")
+            option = input("Choose an option (1/2/3/4/5): ").strip()
 
+            if option == '5':
+                break
+            elif option == '3':
+                db_manager.delete_all_chats()
+                print("All chats deleted.")
+            elif option == '2':
+                phone_number = input("Enter phone number to delete chat: ").strip()
+                if phone_number in phone_numbers:
+                    db_manager.delete_chat(phone_number)
+                    print(f"Chat with {phone_number} deleted.")
+                else:
+                    print("Invalid phone number. Please try again.")
+            elif option == '1':
+                phone_number = input("Enter phone number to view chat: ").strip()
+                print_chat(phone_number)
+                send_chat_message(client_socket, phone_number, message_queue)
+            elif option == '4':
+                phone_number = input("Enter phone number to start a new chat: ").strip()
+                send_chat_message(client_socket, phone_number, message_queue)
+            else:
+                print("Invalid option. Please try again.")
 
 
 def print_chat(phone_number):

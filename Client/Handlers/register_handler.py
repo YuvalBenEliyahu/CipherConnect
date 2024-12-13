@@ -4,6 +4,7 @@ from Client.config import ENCODE
 from Client.encryption import public_key_pem
 from Client.utils import get_input, validate_non_empty, validate_phone_number
 
+
 def register(client_socket, message_queue):
     """Register the client with the server."""
     first_name = get_input("Enter your first name: ", validate_non_empty, "First name cannot be empty. Please try again.")
