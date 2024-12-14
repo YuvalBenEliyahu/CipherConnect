@@ -110,3 +110,15 @@ class DatabaseManager:
             WHERE receiver_phone_number = ?
         ''', (receiver_phone_number,))
         self.conn.commit()
+
+    def get_public_key(self, phone_number):
+        """Retrieve the public key for a given phone number."""
+        self.cursor.execute('''
+            SELECT public_key
+            FROM users
+            WHERE phone_number = ?
+        ''', (phone_number,))
+        result = self.cursor.fetchone()
+        if result:
+            return result[0]
+        return None

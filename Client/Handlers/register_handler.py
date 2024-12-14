@@ -1,12 +1,11 @@
 import json
 from Client.Handlers.message_type import MessageType
 from Client.config import ENCODE
-from Client.encryption import public_key_pem
 from Client.queue_manager import message_queue
 from Client.utils import get_input, validate_non_empty, validate_phone_number
 
 
-def register(client_socket):
+def register(client_socket, public_key_pem):
     """Register the client with the server."""
     first_name = get_input("Enter your first name: ", validate_non_empty, "First name cannot be empty. Please try again.")
     last_name = get_input("Enter your last name: ", validate_non_empty, "Last name cannot be empty. Please try again.")

@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class MessageType(Enum):
     LOGIN_SUCCESS = "LOGIN_SUCCESS"
     LOGIN = "LOGIN"
@@ -10,3 +11,5 @@ class MessageType(Enum):
     INCOMING_CHAT_MESSAGE = "INCOMING_CHAT_MESSAGE"
     SUCCESS = "SUCCESS"
     ERROR = "ERROR"
+    PUBLIC_KEY_SUCCESS = "PUBLIC_KEY_SUCCESS"
+    REQUEST_PUBLIC_KEY = "REQUEST_PUBLIC_KEY"

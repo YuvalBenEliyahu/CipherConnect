@@ -7,7 +7,8 @@ from Client.utils import get_input, validate_non_empty, validate_phone_number
 
 def login(client_socket):
     """Login the client with the server."""
-    phone_number = get_input("Enter your phone number: ", validate_phone_number, "Phone number must be 10 digits long and start with '05'. Please try again.")
+    phone_number = get_input("Enter your phone number: ", validate_phone_number,
+                             "Phone number must be 10 digits long and start with '05'. Please try again.")
     password = get_input("Enter your password: ", validate_non_empty, "Password cannot be empty. Please try again.")
 
     data = json.dumps({
@@ -21,7 +22,6 @@ def login(client_socket):
     try:
         client_socket.sendall(data.encode(ENCODE))
 
-        # Wait for login response
         while True:
             if not message_queue.empty():
                 response = message_queue.get()

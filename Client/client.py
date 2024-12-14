@@ -5,12 +5,17 @@ from Client.Handlers.login_handler import login
 from Client.Handlers.chat_handler import navigate_chats
 from Client.Handlers.register_handler import register
 from Client.Handlers.server_comunication_handler import receive_server_messages
+from Client.encryption import generate_ec_keypair, serialize_public_key
 from Client.queue_manager import message_queue
 from Client.config import PORT, HOST
 
 
 def start_client(host=HOST, port=PORT, db_manager=None):
     """Start the client and process CLI commands."""
+
+    # Generate key pair for the client
+    private_key, public_key = generate_ec_keypair()
+    public_key_pem = serialize_public_key(public_key)
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
         try:
@@ -19,7 +24,7 @@ def start_client(host=HOST, port=PORT, db_manager=None):
 
             receive_thread = threading.Thread(
                 target=receive_server_messages,
-                args=(client_socket, db_manager),
+                args=(client_socket, db_manager, private_key),
                 daemon=True
             )
             receive_thread.start()
@@ -38,10 +43,10 @@ def start_client(host=HOST, port=PORT, db_manager=None):
                 option = input("Choose an option (1/2/3): ")
 
                 if option == "1":
-                    register(client_socket)
+                    register(client_socket, public_key_pem)
                 elif option == "2":
                     if login(client_socket):
-                        post_login_screen(client_socket, db_manager)
+                        post_login_screen(client_socket, db_manager, private_key)
                 elif option == "3":
                     print("Exiting.")
                     break
@@ -52,14 +57,15 @@ def start_client(host=HOST, port=PORT, db_manager=None):
         finally:
             print("Closing the client socket.")
 
-def post_login_screen(client_socket, db_manager):
+
+def post_login_screen(client_socket, db_manager, private_key):
     while True:
         print("1. Chat")
         print("2. Logout")
         option = input("Choose an option (1/2): ")
 
         if option == "1":
-            navigate_chats(client_socket, db_manager)
+            navigate_chats(client_socket, db_manager, private_key)
         elif option == "2":
             print("Logging out.")
             break

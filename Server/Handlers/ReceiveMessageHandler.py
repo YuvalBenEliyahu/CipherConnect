@@ -11,16 +11,18 @@ class ReceiveMessageHandler:
         try:
             sender_phone_number = self.get_phone_number_from_connection(connection)
             receiver_phone_number = payload.get("receiver_phone_number")
-            message = payload.get("message")
+            iv = payload.get("iv")
+            ciphertext = payload.get("ciphertext")
             timestamp = payload.get("timestamp")
 
-            if not receiver_phone_number or not message or not timestamp:
+            if not receiver_phone_number or not iv or not ciphertext or not timestamp:
                 self.send_message_handler.send_response(connection, MessageType.ERROR.value, "Invalid message format.")
                 return
 
-            logging.info("Received message from %s to %s: %s", sender_phone_number, receiver_phone_number, message)
-            self.forward_message(sender_phone_number, receiver_phone_number, message, timestamp)
-            self.send_message_handler.send_response(connection, MessageType.OUTGOING_CHAT_MESSAGE_SUCCESS.value, "Message processed.")
+            logging.info("Received message from %s to %s: %s", sender_phone_number, receiver_phone_number, ciphertext)
+            self.forward_message(sender_phone_number, receiver_phone_number, iv, ciphertext, timestamp)
+            self.send_message_handler.send_response(connection, MessageType.OUTGOING_CHAT_MESSAGE_SUCCESS.value,
+                                                    "Message processed.")
         except Exception as e:
             logging.error(f"Exception: {e}")
             self.send_message_handler.send_response(connection, MessageType.ERROR.value, str(e))
@@ -32,5 +34,5 @@ class ReceiveMessageHandler:
         logging.error("Phone number not found for the given connection.")
         return None
 
-    def forward_message(self, sender_phone_number, receiver_phone_number, message, timestamp):
-        self.send_message_handler.send_message(sender_phone_number, receiver_phone_number, message, timestamp)
+    def forward_message(self, sender_phone_number, receiver_phone_number, iv, ciphertext, timestamp):
+        self.send_message_handler.send_message(sender_phone_number, receiver_phone_number, iv, ciphertext, timestamp)

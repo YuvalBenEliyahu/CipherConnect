@@ -11,7 +11,8 @@ def view_chats(db_manager):
         print(f"  {phone_number}")
     return phone_numbers
 
-def navigate_chats(client_socket, db_manager):
+
+def navigate_chats(client_socket, db_manager, private_key):
     """Navigate between chats and send messages."""
     while True:
         phone_numbers = view_chats(db_manager)
@@ -26,7 +27,7 @@ def navigate_chats(client_socket, db_manager):
                 break
             elif option == '1':
                 phone_number = input("Enter phone number to start a new chat: ").strip()
-                send_chat_message(client_socket, phone_number, db_manager)
+                send_chat_message(client_socket, phone_number, db_manager, private_key)
             else:
                 print("Invalid option. Please try again.")
         else:
@@ -53,12 +54,13 @@ def navigate_chats(client_socket, db_manager):
             elif option == '1':
                 phone_number = input("Enter phone number to view chat: ").strip()
                 print_chat(phone_number, db_manager)
-                send_chat_message(client_socket, phone_number, db_manager)
+                send_chat_message(client_socket, phone_number, db_manager, private_key)
             elif option == '4':
                 phone_number = input("Enter phone number to start a new chat: ").strip()
-                send_chat_message(client_socket, phone_number, db_manager)
+                send_chat_message(client_socket, phone_number, db_manager, private_key)
             else:
                 print("Invalid option. Please try again.")
+
 
 def print_chat(phone_number, db_manager):
     """Print the chat with a specific user."""
@@ -69,4 +71,3 @@ def print_chat(phone_number, db_manager):
             print(f"  {timestamp} - {message}")
     else:
         print("No chat history with this number.")
-

@@ -5,6 +5,8 @@ from Server.Handlers.MessageType import MessageType
 from Server.Handlers.ReceiveMessageHandler import ReceiveMessageHandler
 from Server.Handlers.RegistrationHandler import RegistrationHandler
 from Server.Handlers.SendMessageHandler import SendMessageHandler
+from Server.Handlers.keyHandler import KeyHandler
+
 
 class MessageHandler:
     def __init__(self, db_manager, clients):
@@ -36,5 +38,8 @@ class MessageHandler:
         elif type == MessageType.OUTGOING_CHAT_MESSAGE.value:
             receive_message_handler = ReceiveMessageHandler(self.db_manager, self.clients, self.send_message_handler)
             receive_message_handler.handle(payload, client_address, client_socket)
+        elif type == MessageType.REQUEST_PUBLIC_KEY.value:
+            request_public_key_handler = KeyHandler(self.db_manager, self.clients, self.send_message_handler)
+            request_public_key_handler.handle(payload, client_address, client_socket)
         else:
             self.send_message_handler.send_response(client_socket, MessageType.ERROR.value, f"Unknown type '{type}'")
