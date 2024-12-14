@@ -23,3 +23,5 @@ Client/client_chats.db
 /Client/client_chat
 /Client/client_chats
 /Client/users.db
+/Client/client1_chats
+/Client/client2_chats

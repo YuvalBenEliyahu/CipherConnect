@@ -5,20 +5,17 @@ from Client.Handlers.login_handler import login
 from Client.Handlers.chat_handler import navigate_chats
 from Client.Handlers.register_handler import register
 from Client.Handlers.server_comunication_handler import receive_server_messages
-from Client.Database.Database import ClientDatabaseManager
-from Client.config import PORT, HOST
 from Client.queue_manager import message_queue
+from Client.config import PORT, HOST
 
 
-def start_client(host=HOST, port=PORT):
+def start_client(host=HOST, port=PORT, db_manager=None):
     """Start the client and process CLI commands."""
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
         try:
             client_socket.connect((host, port))
             print(f"Connected to server at {host}:{port}")
-
-            db_manager = ClientDatabaseManager()
 
             receive_thread = threading.Thread(
                 target=receive_server_messages,
