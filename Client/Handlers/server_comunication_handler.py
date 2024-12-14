@@ -32,7 +32,7 @@ def receive_server_messages(client_socket, db_manager):
                         db_manager.add_chat_message(sender_phone_number, f"{sender_phone_number}: {message}", timestamp)
                         print_chat(sender_phone_number, db_manager)
                 elif message_type == MessageType.INCOMING_CHAT_MESSAGE.value:
-                    receive_chat_message(client_socket, db_manager)
+                    receive_chat_message(message_data, db_manager)
                 elif message_type == MessageType.SUCCESS.value:
                     print(f"Server response: {message_data.get('message')}")
                 elif message_type == MessageType.ERROR.value:

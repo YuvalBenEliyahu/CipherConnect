@@ -3,15 +3,9 @@ from Client.Handlers.message_type import MessageType
 from Client.queue_manager import message_queue
 
 
-def receive_chat_message(client_socket, db_manager):
+def receive_chat_message(received_message, db_manager):
     """Receive a chat message from the server."""
     try:
-        data = client_socket.recv(1024).decode('utf-8')
-        if not data:
-            print("Server closed the connection.")
-            return
-
-        received_message = json.loads(data)
         message_type = received_message.get("type")
         message_data = received_message.get("data")
 

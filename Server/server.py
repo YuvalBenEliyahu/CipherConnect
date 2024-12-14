@@ -18,6 +18,7 @@ clients = Clients(db_manager)
 # Create an instance of MessageHandler
 message_handler = MessageHandler(db_manager, clients)
 
+
 def handle_client(client_socket, client_address):
     try:
         while True:
@@ -52,6 +53,7 @@ def handle_client(client_socket, client_address):
                 client_socket.close()
             except OSError as close_error:
                 logging.error(f"Failed to close client socket: {close_error}")
+
 
 def start_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

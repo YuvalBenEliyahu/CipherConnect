@@ -25,12 +25,10 @@ class SendMessageHandler:
             # Send message to the connected user
             receiver_connection.sendall(json.dumps(message_data).encode('utf-8'))
             logging.info("Message sent to %s from %s: %s", receiver_phone_number, sender_phone_number, message)
-            self.send_response(receiver_connection, MessageType.SUCCESS.value, "Message delivered")
         else:
             # Save message as offline
             self.db_manager.add_offline_message(sender_phone_number, receiver_phone_number, message, timestamp)
             logging.info("User %s is offline. Message saved.", receiver_phone_number)
-            self.send_response(receiver_connection, MessageType.SUCCESS.value, "User is offline. Message saved")
 
         # Send OUTGOING_CHAT_MESSAGE_SUCCESS to the sender
         sender_connection = self.clients.get_connected_user(sender_phone_number)
@@ -40,6 +38,6 @@ class SendMessageHandler:
     def send_offline_messages(self, phone_number):
         offline_messages = self.db_manager.get_offline_messages(phone_number)
         for message in offline_messages:
-            self.send_message(message['sender'], phone_number, message['message'], message['timestamp'])
+            self.send_message(message[0], phone_number, message[1], message[2])
         self.db_manager.delete_offline_messages(phone_number)
-        return "SUCCESS: Offline messages sent."
+        logging.info("Offline messages sent to %s", phone_number)

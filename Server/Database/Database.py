@@ -82,8 +82,7 @@ class DatabaseManager:
             }
         return None
 
-    def add_offline_message(self, sender_phone_number, receiver_phone_number, message):
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    def add_offline_message(self, sender_phone_number, receiver_phone_number, message, timestamp):
         self.cursor.execute('''
             INSERT INTO offline_messages (sender_phone_number, receiver_phone_number, message, timestamp)
             VALUES (?, ?, ?, ?)
