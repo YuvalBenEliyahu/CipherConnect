@@ -15,10 +15,9 @@
 Server/users.db
 Server/Test/users.db
 
-Client/client_chats.db
 
 /Client/client_chat
 /Client/client_chats
 /Client/users.db
-/Client/client1_chats
-/Client/client2_chats
+Client/client[1-9]_chats.db
+
