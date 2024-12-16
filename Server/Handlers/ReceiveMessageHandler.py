@@ -19,7 +19,7 @@ class ReceiveMessageHandler:
                 self.send_message_handler.send_response(connection, MessageType.ERROR.value, "Invalid message format.")
                 return
 
-            logging.info("Received message from %s to %s: %s", sender_phone_number, receiver_phone_number, ciphertext)
+            logging.info("Received message from %s to %s: iv: %s , ciphertext: %s", sender_phone_number, receiver_phone_number,iv, ciphertext)
             self.forward_message(sender_phone_number, receiver_phone_number, iv, ciphertext, timestamp)
             self.send_message_handler.send_response(connection, MessageType.OUTGOING_CHAT_MESSAGE_SUCCESS.value,
                                                     "Message processed.")

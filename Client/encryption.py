@@ -53,10 +53,14 @@ def encrypt_message(plaintext, symmetric_key):
 
 def decrypt_message(iv, ciphertext, symmetric_key):
     """Decrypt a message using AES-CBC."""
-    cipher = Cipher(algorithms.AES(symmetric_key), modes.CBC(iv), backend=default_backend())
-    decryptor = cipher.decryptor()
-    unpadder = padding.PKCS7(algorithms.AES.block_size).unpadder()
-    padded_data = decryptor.update(ciphertext) + decryptor.finalize()
-    plaintext = unpadder.update(padded_data) + unpadder.finalize()
-    return plaintext.decode()
+    try:
+        cipher = Cipher(algorithms.AES(symmetric_key), modes.CBC(iv), backend=default_backend())
+        decryptor = cipher.decryptor()
+        unpadder = padding.PKCS7(algorithms.AES.block_size).unpadder()
+        padded_data = decryptor.update(ciphertext) + decryptor.finalize()
+        plaintext = unpadder.update(padded_data) + unpadder.finalize()
+        return plaintext.decode()
+    except ValueError as e:
+        print(f"Decryption error: {e}")
+        return None
 

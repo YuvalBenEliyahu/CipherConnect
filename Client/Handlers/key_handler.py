@@ -6,31 +6,25 @@ from Client.config import ENCODE
 from Client.encryption import serialize_public_key, load_public_key
 
 discovered_keys = {}
-public_key_queue = queue.Queue()
+
+import time
 
 
 def get_public_key(client_socket, phone_number):
     """Retrieve a public key from the cache with retry logic."""
-    retries = 3
-    for attempt in range(retries):
-        print(f"Attempt {attempt + 1}: Checking for public key for {phone_number}.")
-        if phone_number not in discovered_keys:
-            request_public_key(client_socket, phone_number)
 
-            try:
-                # Wait for the public key to be received
-                public_key_queue.get(timeout=10)
-                if phone_number in discovered_keys:
-                    print(f"Public key discovered for {phone_number} on attempt {attempt + 1}.")
-                    return discovered_keys.get(phone_number)
-            except queue.Empty:
-                print(f"Attempt {attempt + 1}: Timeout while waiting for public key for {phone_number}.")
+    if phone_number not in discovered_keys:
+        request_public_key(client_socket, phone_number)
 
-        else:
-            return discovered_keys.get(phone_number)
+        for i in range(3):
+            if phone_number in discovered_keys:
+                return discovered_keys.get(phone_number)
+            time.sleep(1)
 
-    print(f"Failed to retrieve public key for {phone_number} after {retries} attempts.")
-    return None
+        raise Exception(f"Public key for {phone_number} not found.")
+
+    else:
+        return discovered_keys.get(phone_number)
 
 
 def send_public_key(client_socket, private_key, peer_phone_number):
@@ -73,9 +67,6 @@ def receive_public_key(received_message):
         peer_public_key = load_public_key(public_key_pem)
         discovered_keys[peer_phone_number] = peer_public_key
         print(f"Discovered public key for {peer_phone_number}.")
-
-        # Notify waiting threads
-        public_key_queue.put(peer_phone_number)
 
         return peer_public_key
     except Exception as e:

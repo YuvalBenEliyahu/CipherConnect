@@ -26,7 +26,7 @@ class SendMessageHandler:
         if receiver_connection:
             # Send message to the connected user
             receiver_connection.sendall(json.dumps(message_data).encode('utf-8'))
-            logging.info("Message sent to %s from %s: %s", receiver_phone_number, sender_phone_number, ciphertext)
+            logging.info("Message sent to %s from %s: iv: %s , ciphertext: %s", receiver_phone_number, sender_phone_number,iv, ciphertext)
         else:
             # Save message as offline
             self.db_manager.add_offline_message(sender_phone_number, receiver_phone_number, iv, ciphertext, timestamp)
