@@ -7,10 +7,48 @@ from cryptography.hazmat.backends import default_backend
 import os
 
 
-def generate_ec_keypair():
-    """Generate an ECDH key pair."""
-    private_key = ec.generate_private_key(ec.SECP256R1())
-    public_key = private_key.public_key()
+def generate_or_load_ec_keypair(private_key_file, public_key_file):
+    """Generate or load an ECDH key pair from files."""
+    if os.path.exists(private_key_file) and os.path.exists(public_key_file):
+        # Load the private key
+        with open(private_key_file, 'rb') as private_file:
+            private_key = serialization.load_pem_private_key(
+                private_file.read(),
+                password=None
+            )
+
+        # Load the public key
+        with open(public_key_file, 'rb') as public_file:
+            public_key = serialization.load_pem_public_key(
+                public_file.read()
+            )
+    else:
+        # Generate a new key pair
+        private_key = ec.generate_private_key(ec.SECP256R1())
+        public_key = private_key.public_key()
+
+        # Ensure the directory exists if a directory is specified
+        private_key_dir = os.path.dirname(private_key_file)
+        if private_key_dir and not os.path.exists(private_key_dir):
+            os.makedirs(private_key_dir, exist_ok=True)
+
+        # Serialize and save the private key
+        private_key_bytes = private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption()
+        )
+        with open(private_key_file, 'wb') as private_file:
+            private_file.write(private_key_bytes)
+
+        # Serialize and save the public key
+        public_key_bytes = public_key.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        )
+        with open(public_key_file, 'wb') as public_file:
+            public_file.write(public_key_bytes)
+
     return private_key, public_key
 
 

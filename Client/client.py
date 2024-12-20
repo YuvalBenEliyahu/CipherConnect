@@ -5,16 +5,15 @@ from Client.Handlers.login_handler import login
 from Client.Handlers.chat_handler import navigate_chats
 from Client.Handlers.register_handler import register
 from Client.Handlers.server_comunication_handler import receive_server_messages
-from Client.encryption import generate_ec_keypair, serialize_public_key
+from Client.encryption import generate_or_load_ec_keypair, serialize_public_key
 from Client.queue_manager import message_queue
-from Client.config import PORT, HOST
 
 
-def start_client(host=HOST, port=PORT, db_manager=None):
+def start_client(host, port, db_manager, private_key_file, public_key_file):
     """Start the client and process CLI commands."""
 
     # Generate key pair for the client
-    private_key, public_key = generate_ec_keypair()
+    private_key, public_key = generate_or_load_ec_keypair(private_key_file, public_key_file)
     public_key_pem = serialize_public_key(public_key)
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
