@@ -6,6 +6,7 @@ from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.backends import default_backend
 import os
 
+DEFAULT_SALT = b'\x00' * 16
 
 def generate_or_load_ec_keypair(private_key_file, public_key_file):
     """Generate or load an ECDH key pair from files."""
@@ -71,8 +72,7 @@ def derive_symmetric_key(private_key, peer_public_key):
     hkdf = HKDF(
         algorithm=hashes.SHA256(),
         length=32,
-        salt=os.urandom(16),
-        info=b"chat encryption",
+        salt=DEFAULT_SALT,
         backend=default_backend()
     )
     return hkdf.derive(shared_secret)

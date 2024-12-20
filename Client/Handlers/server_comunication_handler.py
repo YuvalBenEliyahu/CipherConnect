@@ -13,6 +13,8 @@ def handle_message(message_data, db_manager, private_key, client_socket):
     print(f"Handling message type: {message_type} with data: {message_data}")
     if message_type == MessageType.LOGIN_SUCCESS.value:
         message_queue.put(message_data)
+    elif message_type == MessageType.REGISTER_RESPONSE_KEY.value:
+        message_queue.put(message_data)
     elif message_type == MessageType.REGISTRATION_SUCCESS.value:
         message_queue.put(message_data)
     elif message_type == MessageType.PUBLIC_KEY_SUCCESS.value:
