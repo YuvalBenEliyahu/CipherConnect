@@ -1,4 +1,3 @@
-from datetime import time
 
 from Client.Handlers.key_handler import discovered_keys, request_public_key, get_public_key
 from Client.Handlers.message_type import MessageType
@@ -19,7 +18,9 @@ def receive_chat_message(received_message, db_manager, private_key, client_socke
             if not peer_public_key:
                 print(f"Public key not found for {sender_phone_number}.")
                 return
-            symmetric_key = derive_symmetric_key(private_key, peer_public_key)
+
+            salt = bytes.fromhex(message_data.get("salt"))
+            symmetric_key, _ = derive_symmetric_key(private_key, peer_public_key, salt)
 
             iv = bytes.fromhex(message_data.get("iv"))
             ciphertext = bytes.fromhex(message_data.get("ciphertext"))

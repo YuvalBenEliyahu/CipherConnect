@@ -66,16 +66,19 @@ def load_public_key(public_key_bytes):
     return serialization.load_pem_public_key(public_key_bytes, backend=default_backend())
 
 
-def derive_symmetric_key(private_key, peer_public_key):
-    """Derive a symmetric key using ECDH shared secret and HKDF."""
+def derive_symmetric_key(private_key, peer_public_key, salt=None):
+    """Derive a symmetric key using ECDH shared secret and HKDF with a random salt."""
+    if salt is None:
+        salt = os.urandom(16)
     shared_secret = private_key.exchange(ec.ECDH(), peer_public_key)
     hkdf = HKDF(
         algorithm=hashes.SHA256(),
         length=32,
-        salt=DEFAULT_SALT,
+        salt=salt,
+        info=b'handshake data',
         backend=default_backend()
     )
-    return hkdf.derive(shared_secret)
+    return hkdf.derive(shared_secret), salt
 
 
 def encrypt_message(plaintext, symmetric_key):

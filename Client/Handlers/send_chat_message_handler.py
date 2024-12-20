@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 
-from Client.Handlers.key_handler import discovered_keys, send_public_key, request_public_key, get_public_key
+from Client.Handlers.key_handler import get_public_key
 from Client.Handlers.message_type import MessageType
 from Client.config import TIME_STAMP_FORMAT, ENCODE
 from Client.encryption import derive_symmetric_key, encrypt_message
@@ -15,7 +15,7 @@ def send_chat_message(client_socket, to_phone_number, db_manager, private_key):
         if not peer_public_key:
             print(f"Public key not found for {to_phone_number}.")
             return
-        symmetric_key = derive_symmetric_key(private_key, peer_public_key)
+        symmetric_key, salt = derive_symmetric_key(private_key, peer_public_key)
 
         message = input("Enter your message: ")
         iv, ciphertext = encrypt_message(message, symmetric_key)
@@ -27,7 +27,8 @@ def send_chat_message(client_socket, to_phone_number, db_manager, private_key):
                 "receiver_phone_number": to_phone_number,
                 "iv": iv.hex(),
                 "ciphertext": ciphertext.hex(),
-                "timestamp": timestamp
+                "timestamp": timestamp,
+                "salt": salt.hex()
             }
         })
         client_socket.sendall(data.encode(ENCODE))
