@@ -24,9 +24,9 @@ def handle_message(message_data, db_manager, private_key, client_socket):
     elif message_type == MessageType.OUTGOING_CHAT_MESSAGE_SUCCESS.value:
         message_queue.put(message_data)
     elif message_type == MessageType.SUCCESS.value:
-        print(f"Server response: {message_data.get('message')}")
+        print(f"Server response: {message_data.get('data')}")
     elif message_type == MessageType.ERROR.value:
-        print(f"Server error: {message_data.get('message')}")
+        print(f"Server error: {message_data.get('data')}")
         message_queue.put(message_data)
     else:
         print(f"Unknown message type: {message_type}")
