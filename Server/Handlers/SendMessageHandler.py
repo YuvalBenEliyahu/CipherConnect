@@ -12,6 +12,12 @@ class SendMessageHandler:
         response = json.dumps({"type": message_type, "data": message})
         connection.sendall(response.encode('utf-8'))
 
+    def SendBySecureChannel(self, connection, message_type, message):
+        # This is not a real secure channel, just a demonstration for the sake of the project
+        response = json.dumps({"type": message_type, "data": message})
+        connection.sendall(response.encode('utf-8'))
+
+
     def send_message(self, sender_phone_number, receiver_phone_number, iv, ciphertext, timestamp):
         receiver_connection = self.clients.get_connected_user(receiver_phone_number)
         message_data = {

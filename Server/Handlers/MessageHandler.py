@@ -61,7 +61,7 @@ class MessageHandler:
         timer = threading.Timer(60.0, self.invalidate_password, [client_address])
         timer.start()
 
-        self.send_message_handler.send_response(client_socket, MessageType.REGISTER_RESPONSE_KEY.value, {"password": six_digit_password})
+        self.send_message_handler.SendBySecureChannel(client_socket, MessageType.REGISTER_RESPONSE_KEY.value,{"password": six_digit_password})
 
     def handle_register(self, payload, client_socket, client_address):
         print(f"Handling registration for {client_address}")
