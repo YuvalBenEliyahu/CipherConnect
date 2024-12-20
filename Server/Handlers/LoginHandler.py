@@ -1,7 +1,7 @@
-
+import json
 import logging
 from Server.Handlers.MessageType import MessageType
-from Server.utils import derive_key
+from Server.encryption import derive_key, load_server_private_key, decrypt_data
 
 
 class LoginHandler:
@@ -14,6 +14,10 @@ class LoginHandler:
         logging.debug("Handling login with data: %s from %s", data, client_address)
 
         try:
+            # Decrypt the data
+            decrypted_data = decrypt_data(data, load_server_private_key())
+            data = json.loads(decrypted_data)
+
             phone_number = data.get("phone_number")
             password = data.get("password")
 

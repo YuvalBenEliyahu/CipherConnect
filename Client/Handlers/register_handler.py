@@ -1,25 +1,25 @@
+import hashlib
+import hmac
 import json
+import logging
+
 from Client.Handlers.message_type import MessageType
 from Client.config import ENCODE
+from Client.encryption import encrypt_data, load_server_public_key
 from Client.queue_manager import message_queue
 from Client.utils import get_input, validate_non_empty, validate_phone_number
-import hmac
-import hashlib
 
 
 def register(client_socket, public_key_pem):
     """Register the client with the server."""
 
-    # Send REGISTER_REQUEST_KEY to the server
-    request_data = json.dumps({
-        "type": MessageType.REGISTER_REQUEST_KEY.value,
-        "data": {}
-    })
-
+    # Request server key for registration
     try:
-        client_socket.sendall(request_data.encode(ENCODE))
+        client_socket.sendall(json.dumps({
+            "type": MessageType.REGISTER_REQUEST_KEY.value,
+            "data": {}
+        }).encode(ENCODE))
 
-        # Wait for REGISTER_RESPONSE_KEY response
         while True:
             if not message_queue.empty():
                 response = message_queue.get()
@@ -31,33 +31,38 @@ def register(client_socket, public_key_pem):
                     print(f"Request failed: {response.get('message')}")
                     return
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"Error during registration key request: {e}")
         return
 
-    first_name = get_input("Enter your first name: ", validate_non_empty, "First name cannot be empty. Please try again.")
-    last_name = get_input("Enter your last name: ", validate_non_empty, "Last name cannot be empty. Please try again.")
-    phone_number = get_input("Enter your phone number: ", validate_phone_number, "Phone number must be 10 digits long and start with '05'. Please try again.")
-    password = get_input("Enter your password: ", validate_non_empty, "Password cannot be empty. Please try again.")
+    first_name = get_input("Enter your first name: ", validate_non_empty, "First name cannot be empty.")
+    last_name = get_input("Enter your last name: ", validate_non_empty, "Last name cannot be empty.")
+    phone_number = get_input("Enter your phone number: ", validate_phone_number, "Phone number must start with '05'.")
+    password = get_input("Enter your password: ", validate_non_empty, "Password cannot be empty.")
 
-    # Sign the public key using the 6-digit password
     signature = hmac.new(six_digit_password.encode(), public_key_pem, hashlib.sha256).hexdigest()
 
     data = json.dumps({
-        "type": MessageType.REGISTER.value,
-        "data": {
-            "first_name": first_name,
-            "last_name": last_name,
-            "phone_number": phone_number,
-            "password": password,
-            "public_key": public_key_pem.decode('utf-8'),
-            "signature": signature
-        }
+        "first_name": first_name,
+        "last_name": last_name,
+        "phone_number": phone_number,
+        "password": password,
+        "signature": signature
     })
 
     try:
-        client_socket.sendall(data.encode(ENCODE))
+        public_key = load_server_public_key()
+        encrypted_data = encrypt_data(data, public_key)
 
-        # Wait for registration response
+        payload = json.dumps({
+            "type": MessageType.REGISTER.value,
+            "data": {
+                "encrypted_data": encrypted_data.hex(),
+                "public_key": public_key_pem.decode('utf-8')
+            }
+        })
+
+        client_socket.sendall(payload.encode(ENCODE))
+
         while True:
             if not message_queue.empty():
                 response = message_queue.get()
@@ -67,7 +72,5 @@ def register(client_socket, public_key_pem):
                 elif response.get("type") == MessageType.ERROR.value:
                     print(f"Registration failed: {response.get('message')}")
                     break
-    except ConnectionAbortedError as e:
-        print(f"Connection was aborted: {e}")
     except Exception as e:
-        print(f"An error occurred: {e}")
+        logging.error(f"An error occurred during registration: {e}")

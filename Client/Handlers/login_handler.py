@@ -1,6 +1,9 @@
 import json
+import logging
+
 from Client.Handlers.message_type import MessageType
 from Client.config import ENCODE
+from Client.encryption import encrypt_data, load_server_public_key
 from Client.queue_manager import message_queue
 from Client.utils import get_input, validate_non_empty, validate_phone_number
 
@@ -12,15 +15,20 @@ def login(client_socket):
     password = get_input("Enter your password: ", validate_non_empty, "Password cannot be empty. Please try again.")
 
     data = json.dumps({
-        "type": MessageType.LOGIN.value,
-        "data": {
-            "phone_number": phone_number,
-            "password": password
-        }
+        "phone_number": phone_number,
+        "password": password
     })
 
     try:
-        client_socket.sendall(data.encode(ENCODE))
+        public_key = load_server_public_key()
+        encrypted_data = encrypt_data(data, public_key)
+
+        payload = json.dumps({
+            "type": MessageType.LOGIN.value,
+            "data": encrypted_data.hex()
+        })
+
+        client_socket.sendall(payload.encode(ENCODE))
 
         while True:
             if not message_queue.empty():
@@ -29,8 +37,8 @@ def login(client_socket):
                     print("Login successful!")
                     return True
                 elif response.get("type") == MessageType.ERROR.value:
+                    print("Login failed.")
                     return False
-    except ConnectionAbortedError as e:
-        print(f"Connection was aborted: {e}")
     except Exception as e:
-        print(f"An error occurred: {e}")
+        logging.error(f"An error occurred during login: {e}")
+        return False

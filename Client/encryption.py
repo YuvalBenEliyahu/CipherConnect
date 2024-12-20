@@ -1,12 +1,16 @@
-from cryptography.hazmat.primitives.asymmetric import ec
-from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.kdf.hkdf import HKDF
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.primitives import padding
-from cryptography.hazmat.backends import default_backend
+import logging
 import os
 
-DEFAULT_SALT = b'\x00' * 16
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import ec, padding
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+from cryptography.hazmat.primitives import padding as sym_padding
+from Client.config import SERVER_PUBLIC_KEY
+
 
 def generate_or_load_ec_keypair(private_key_file, public_key_file):
     """Generate or load an ECDH key pair from files."""
@@ -60,6 +64,19 @@ def serialize_public_key(public_key):
         format=serialization.PublicFormat.SubjectPublicKeyInfo
     )
 
+def load_server_public_key(path=SERVER_PUBLIC_KEY):
+    """Load the server's RSA public key from a PEM file."""
+    try:
+        with open(path, 'rb') as key_file:
+            public_key = serialization.load_pem_public_key(
+                key_file.read(), backend=default_backend()
+            )
+        if not isinstance(public_key, RSAPublicKey):
+            raise ValueError("Loaded key is not an RSA public key.")
+        return public_key
+    except Exception as e:
+        logging.error(f"Failed to load server public key: {e}")
+        raise
 
 def load_public_key(public_key_bytes):
     """Load a public key from serialized bytes."""
@@ -84,20 +101,19 @@ def derive_symmetric_key(private_key, peer_public_key, salt=None):
 def encrypt_message(plaintext, symmetric_key):
     """Encrypt a message using AES-CBC."""
     iv = os.urandom(16)
-    cipher = Cipher(algorithms.AES(symmetric_key), modes.CBC(iv), backend=default_backend())
+    cipher = Cipher(algorithms.AES(symmetric_key), modes.CBC(iv))
     encryptor = cipher.encryptor()
-    padder = padding.PKCS7(algorithms.AES.block_size).padder()
+    padder = sym_padding.PKCS7(algorithms.AES.block_size).padder()
     padded_data = padder.update(plaintext.encode()) + padder.finalize()
     ciphertext = encryptor.update(padded_data) + encryptor.finalize()
     return iv, ciphertext
 
-
 def decrypt_message(iv, ciphertext, symmetric_key):
     """Decrypt a message using AES-CBC."""
     try:
-        cipher = Cipher(algorithms.AES(symmetric_key), modes.CBC(iv), backend=default_backend())
+        cipher = Cipher(algorithms.AES(symmetric_key), modes.CBC(iv))
         decryptor = cipher.decryptor()
-        unpadder = padding.PKCS7(algorithms.AES.block_size).unpadder()
+        unpadder = sym_padding.PKCS7(algorithms.AES.block_size).unpadder()
         padded_data = decryptor.update(ciphertext) + decryptor.finalize()
         plaintext = unpadder.update(padded_data) + unpadder.finalize()
         return plaintext.decode()
@@ -105,3 +121,12 @@ def decrypt_message(iv, ciphertext, symmetric_key):
         print(f"Decryption error: {e}")
         return None
 
+def encrypt_data(data, public_key):
+        return public_key.encrypt(
+            data.encode('utf-8'),
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
+        )

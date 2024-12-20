@@ -18,20 +18,15 @@ class MessageHandler:
 
     def validate_request(self, request, connection):
         type = request.get("type")
-        payload = request.get("data")
 
         if not type:
             connection.send("ERROR: Missing type.".encode())
-            return None, None
+            return None
 
-        if type != MessageType.REGISTER_REQUEST_KEY.value and not payload:
-            connection.send("ERROR: Missing payload.".encode())
-            return None, None
-
-        return type, payload
+        return type
 
     def handle_message(self, request, client_socket, client_address):
-        type, payload = self.validate_request(request, client_socket)
+        type = self.validate_request(request, client_socket)
         if not type:
             return
 
@@ -39,7 +34,7 @@ class MessageHandler:
 
         handler = self.get_handler(type)
         if handler:
-            handler(payload, client_socket, client_address)
+            handler(request.get("data"), client_socket, client_address)
         else:
             print(f"Unknown message type: {type} from {client_address}")
             self.send_message_handler.send_response(client_socket, MessageType.ERROR.value, f"Unknown type '{type}'")
@@ -61,11 +56,13 @@ class MessageHandler:
         timer = threading.Timer(60.0, self.invalidate_password, [client_address])
         timer.start()
 
-        self.send_message_handler.SendBySecureChannel(client_socket, MessageType.REGISTER_RESPONSE_KEY.value,{"password": six_digit_password})
+        self.send_message_handler.SendBySecureChannel(client_socket, MessageType.REGISTER_RESPONSE_KEY.value,
+                                                      {"password": six_digit_password})
 
     def handle_register(self, payload, client_socket, client_address):
         print(f"Handling registration for {client_address}")
-        registration_handler = RegistrationHandler(self.db_manager, self.clients, self.send_message_handler, self.pending_registrations)
+        registration_handler = RegistrationHandler(self.db_manager, self.clients, self.send_message_handler,
+                                                   self.pending_registrations)
         registration_handler.handle(payload, client_address, client_socket)
 
     def handle_login(self, payload, client_socket, client_address):
