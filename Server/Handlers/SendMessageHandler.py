@@ -44,6 +44,7 @@ class SendMessageHandler:
     def send_offline_messages(self, phone_number):
         offline_messages = self.db_manager.get_offline_messages(phone_number)
         for message in offline_messages:
-            self.send_message(message[0], phone_number, message[1], message[2])
+            sender_phone_number, iv, ciphertext, salt, timestamp = message
+            self.send_message(sender_phone_number, phone_number, iv, ciphertext, timestamp, salt)
         self.db_manager.delete_offline_messages(phone_number)
         logging.info("Offline messages sent to %s", phone_number)

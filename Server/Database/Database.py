@@ -27,7 +27,9 @@ class DatabaseManager:
                    id INTEGER PRIMARY KEY AUTOINCREMENT,
                    sender_phone_number TEXT NOT NULL,
                    receiver_phone_number TEXT NOT NULL,
-                   message TEXT NOT NULL,
+                   iv TEXT NOT NULL,
+                   ciphertext TEXT NOT NULL,
+                   salt TEXT NOT NULL,
                    timestamp TEXT NOT NULL,
                    FOREIGN KEY (receiver_phone_number) REFERENCES users(phone_number)
                )
@@ -82,29 +84,23 @@ class DatabaseManager:
             }
         return None
 
-    def add_offline_message(self, sender_phone_number, receiver_phone_number, message, timestamp):
+    def add_offline_message(self, sender_phone_number, receiver_phone_number, iv, ciphertext, timestamp, salt):
         self.cursor.execute('''
-            INSERT INTO offline_messages (sender_phone_number, receiver_phone_number, message, timestamp)
-            VALUES (?, ?, ?, ?)
-        ''', (sender_phone_number, receiver_phone_number, message, timestamp))
+            INSERT INTO offline_messages (sender_phone_number, receiver_phone_number, iv, ciphertext, salt, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (sender_phone_number, receiver_phone_number, iv, ciphertext, salt, timestamp))
         self.conn.commit()
 
     def get_offline_messages(self, receiver_phone_number):
         self.cursor.execute('''
-            SELECT sender_phone_number, message, timestamp
+            SELECT sender_phone_number, iv, ciphertext, salt, timestamp
             FROM offline_messages
             WHERE receiver_phone_number = ?
         ''', (receiver_phone_number,))
         messages = self.cursor.fetchall()
-        self.cursor.execute('''
-            DELETE FROM offline_messages
-            WHERE receiver_phone_number = ?
-        ''', (receiver_phone_number,))
-        self.conn.commit()
         return messages
 
     def delete_offline_messages(self, receiver_phone_number):
-        """Delete offline messages for a specific receiver."""
         self.cursor.execute('''
             DELETE FROM offline_messages
             WHERE receiver_phone_number = ?
