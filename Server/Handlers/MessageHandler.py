@@ -51,6 +51,7 @@ class MessageHandler:
     def handle_register_request_key(self, payload, client_socket, client_address):
         print(f"Handling register request key for {client_address}")
         six_digit_password = ''.join(random.choices('0123456789', k=6))
+        print(f"Generated 6-digit password: {six_digit_password}")
         self.pending_registrations[client_address] = six_digit_password
 
         timer = threading.Timer(60.0, self.invalidate_password, [client_address])

@@ -27,6 +27,7 @@ def generate_or_load_ec_keypair(private_key_file, public_key_file):
             public_key = serialization.load_pem_public_key(
                 public_file.read()
             )
+        print(f"Loaded existing EC key pair. Private key: {private_key.private_numbers().private_value}, Public key: {public_key.public_numbers().x}, {public_key.public_numbers().y}")
     else:
         # Generate a new key pair
         private_key = ec.generate_private_key(ec.SECP256R1())
@@ -53,12 +54,14 @@ def generate_or_load_ec_keypair(private_key_file, public_key_file):
         )
         with open(public_key_file, 'wb') as public_file:
             public_file.write(public_key_bytes)
+        print(f"Generated new EC key pair. Private key: {private_key.private_numbers().private_value}, Public key: {public_key.public_numbers().x}, {public_key.public_numbers().y}")
 
     return private_key, public_key
 
 
 def serialize_public_key(public_key):
     """Serialize a public key for transmission."""
+    print(f"Serializing public key: {public_key.public_numbers().x}, {public_key.public_numbers().y}")
     return public_key.public_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PublicFormat.SubjectPublicKeyInfo
@@ -73,6 +76,7 @@ def load_server_public_key(path=SERVER_PUBLIC_KEY):
             )
         if not isinstance(public_key, RSAPublicKey):
             raise ValueError("Loaded key is not an RSA public key.")
+        print(f"Loaded server public key: {public_key.public_numbers().n}")
         return public_key
     except Exception as e:
         logging.error(f"Failed to load server public key: {e}")
@@ -80,7 +84,9 @@ def load_server_public_key(path=SERVER_PUBLIC_KEY):
 
 def load_public_key(public_key_bytes):
     """Load a public key from serialized bytes."""
-    return serialization.load_pem_public_key(public_key_bytes, backend=default_backend())
+    public_key = serialization.load_pem_public_key(public_key_bytes, backend=default_backend())
+    print(f"Loading public key from bytes: {public_key.public_numbers().x}, {public_key.public_numbers().y}")
+    return public_key
 
 
 def derive_symmetric_key(private_key, peer_public_key, salt=None):
@@ -95,7 +101,9 @@ def derive_symmetric_key(private_key, peer_public_key, salt=None):
         info=b'handshake data',
         backend=default_backend()
     )
-    return hkdf.derive(shared_secret), salt
+    symmetric_key = hkdf.derive(shared_secret)
+    print(f"Derived symmetric key: {symmetric_key.hex()}")
+    return symmetric_key, salt
 
 
 def encrypt_message(plaintext, symmetric_key):
@@ -106,6 +114,7 @@ def encrypt_message(plaintext, symmetric_key):
     padder = sym_padding.PKCS7(algorithms.AES.block_size).padder()
     padded_data = padder.update(plaintext.encode()) + padder.finalize()
     ciphertext = encryptor.update(padded_data) + encryptor.finalize()
+    print(f"Encrypted message. IV: {iv.hex()}, Ciphertext: {ciphertext.hex()}")
     return iv, ciphertext
 
 def decrypt_message(iv, ciphertext, symmetric_key):
@@ -116,17 +125,19 @@ def decrypt_message(iv, ciphertext, symmetric_key):
         unpadder = sym_padding.PKCS7(algorithms.AES.block_size).unpadder()
         padded_data = decryptor.update(ciphertext) + decryptor.finalize()
         plaintext = unpadder.update(padded_data) + unpadder.finalize()
+        print(f"Decrypted message. Plaintext: {plaintext.decode()}")
         return plaintext.decode()
     except ValueError as e:
         print(f"Decryption error: {e}")
         return None
 
 def encrypt_data(data, public_key):
-        return public_key.encrypt(
-            data.encode('utf-8'),
-            padding.OAEP(
-                mgf=padding.MGF1(algorithm=hashes.SHA256()),
-                algorithm=hashes.SHA256(),
-                label=None
-            )
+    print(f"Encrypting data with public key: {public_key.public_numbers().n}")
+    return public_key.encrypt(
+        data.encode('utf-8'),
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
         )
+    )

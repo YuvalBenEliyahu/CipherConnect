@@ -14,11 +14,12 @@ from Server.config import SERVER_PRIVATE_KEY_PATH
 
 def load_server_private_key(path=SERVER_PRIVATE_KEY_PATH):
     with open(path, 'rb') as key_file:
-        return serialization.load_pem_private_key(key_file.read(), password=None, backend=default_backend())
+        private_key = serialization.load_pem_private_key(key_file.read(), password=None, backend=default_backend())
+        print(f"Loaded server private key: {private_key.private_numbers().d}")
+        return private_key
 
 def validate_public_key(pub_key):
     try:
-        # Attempt to load the public key
         serialization.load_pem_public_key(pub_key.encode(), backend=default_backend())
         return True
     except (ValueError, InvalidKey):
@@ -27,7 +28,7 @@ def validate_public_key(pub_key):
 
 def derive_key(password, salt=None, iterations=100000):
     if salt is None:
-        salt = os.urandom(16)  # Generate a new salt if not provided
+        salt = os.urandom(16)
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
         length=32,
@@ -36,6 +37,7 @@ def derive_key(password, salt=None, iterations=100000):
         backend=default_backend()
     )
     key = kdf.derive(password.encode())
+    print(f"Derived key: {key.hex()}", f"Salt: {salt.hex()}")
     return key, salt
 
 
@@ -44,7 +46,7 @@ def decrypt_data(encrypted_data, private_key):
     try:
         if isinstance(encrypted_data, str):
             encrypted_data = bytes.fromhex(encrypted_data)
-        return private_key.decrypt(
+        decrypted_key = private_key.decrypt(
             encrypted_data,
             padding.OAEP(
                 mgf=padding.MGF1(algorithm=hashes.SHA256()),
@@ -52,6 +54,8 @@ def decrypt_data(encrypted_data, private_key):
                 label=None
             )
         ).decode('utf-8')
+        print(f"Decrypted data: {decrypted_key}")
+        return decrypted_key
     except (ValueError, TypeError, InvalidKey, InvalidSignature) as e:
         logging.error(f"Decryption failed: {e}")
         raise
