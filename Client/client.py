@@ -45,7 +45,7 @@ def start_client(host, port, db_manager, private_key_file, public_key_file):
                     register(client_socket, public_key_pem)
                 elif option == "2":
                     if login(client_socket):
-                        post_login_screen(client_socket, db_manager, private_key)
+                        navigate_chats(client_socket, db_manager, private_key)
                 elif option == "3":
                     print("Exiting.")
                     break
@@ -57,16 +57,4 @@ def start_client(host, port, db_manager, private_key_file, public_key_file):
             print("Closing the client socket.")
 
 
-def post_login_screen(client_socket, db_manager, private_key):
-    while True:
-        print("1. Chat")
-        print("2. Logout")
-        option = input("Choose an option (1/2): ")
 
-        if option == "1":
-            navigate_chats(client_socket, db_manager, private_key)
-        elif option == "2":
-            print("Logging out.")
-            break
-        else:
-            print("Invalid option. Please try again.")
