@@ -141,3 +141,20 @@ def encrypt_data(data, public_key):
             label=None
         )
     )
+
+def verify_signature(public_key, signature, data):
+    try:
+        public_key.verify(
+            signature,
+            data,
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
+        )
+        print("Signature verification successful using server public key.")
+        return True
+    except Exception as e:
+        logging.error(f"Signature verification failed: {e}")
+        return False

@@ -59,3 +59,15 @@ def decrypt_data(encrypted_data, private_key):
     except (ValueError, TypeError, InvalidKey, InvalidSignature) as e:
         logging.error(f"Decryption failed: {e}")
         raise
+
+def sign_data(data, private_key):
+    signature = private_key.sign(
+        data,
+        padding.PSS(
+            mgf=padding.MGF1(hashes.SHA256()),
+            salt_length=padding.PSS.MAX_LENGTH
+        ),
+        hashes.SHA256()
+    )
+    return signature
+
